@@ -1,15 +1,18 @@
-このプロジェクトの基本の構造はこれです。
+## プロジェクトの初期状態の構造
 ```
 プロジェクトルート
 ├── app
 │   ├── fonts
 │   │   ├── GeistMonoVF.woff
 │   │   └── GeistVF.woff
+│   ├── setting
 │   ├── favicon.ico
 │   ├── globals.css
 │   ├── layout.tsx
 │   └── page.tsx
 ├── components
+│   ├── okane-note
+│   │   └── TransactionPopup.tsx
 │   ├── ui
 │   │   ├── button.tsx
 │   │   ├── card.tsx
@@ -23,11 +26,35 @@
 │   │   └── textarea.tsx
 │   └── okane-note.tsx
 ├── lib
+│   ├── db
+│   │   ├── settings.ts
+│   │   └── transactions.ts
+│   ├── supabase
+│   │   ├── dummy
+│   │   │   ├── settings.ts
+│   │   │   ├── tasks.ts
+│   │   │   └── transactions.ts
+│   │   └── client.ts
+│   ├── date-utils.ts
+│   ├── financial-utils.ts
 │   └── utils.ts
 ```
 appディレクトリの位置を記憶してください。
 ユーザーがappディレクトリを指定する際は、すべてこの既存のappディレクトリのことを指します。
 
+---
+
+## プロジェクトのルール
+- このアプリは子どもの金銭管理用アプリです。
+- 簡易的な仕事による報酬の授受と、その報酬を使った買い物の記録、残高に対する複利の計算を行います。
+- 入出金の履歴の管理はsupabaseを使用します。
+- 初期の開発段階ではダミーデータを利用しています。
+- 画面構成は「メイン画面」「設定画面」「通帳画面」の3画面です。
+- メイン画面では、現在の残高の簡単な把握、入出金管理、当日分の仕事の管理を行います。
+- 設定画面では、複利利率の設定、仕事の報酬の設定等を行います。常に閲覧は可能ですが、編集するためにはパスワードが必要です。
+- 通帳画面では、入出金の履歴の確認、仕事の履歴の確認を行います。
+
+### コードスタイルと構造
 ---
 
 あなたはTypeScript、Node.js、Next.jsのApp Router、React、Shadcn UI、Radix UI、Tailwindに関する専門家です。
