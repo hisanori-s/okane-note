@@ -13,6 +13,8 @@ import { Label } from "@/components/ui/label"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { ComposedChart, Line, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'
+import { TooltipProps } from 'recharts';
+import { NameType, ValueType } from 'recharts/types/component/DefaultTooltipContent';
 
 import { TransactionLog, Task, DailyWorkRecord } from '@/types'
 import { dummyTransactions } from '@/lib/supabase/dummy/transactions'
@@ -242,14 +244,14 @@ function TransactionHistory({ transactions, onClose }: { transactions: Transacti
 }
 
 // カスタムツールチップコンポーネント
-const CustomTooltip = ({ active, payload, label }: any) => {
+const CustomTooltip = ({ active, payload, label }: TooltipProps<ValueType, NameType>) => {
   if (active && payload && payload.length) {
     return (
       <div className="bg-white p-4 border rounded shadow">
-        <p className="text-sm">{`日付: ${new Date(label).toLocaleDateString()}`}</p>
-        <p className="text-sm">{`残高: ${payload[0].value.toLocaleString()}円`}</p>
-        {payload[1] && <p className="text-sm text-green-600">{`入金: ${payload[1].value.toLocaleString()}円`}</p>}
-        {payload[2] && <p className="text-sm text-red-600">{`出金:  ${payload[2].value.toLocaleString()}円`}</p>}
+        <p className="text-sm">{`日付: ${new Date(label as string).toLocaleDateString()}`}</p>
+        <p className="text-sm">{`残高: ${(payload[0].value as number).toLocaleString()}円`}</p>
+        {payload[1] && <p className="text-sm text-green-600">{`入金: ${(payload[1].value as number).toLocaleString()}円`}</p>}
+        {payload[2] && <p className="text-sm text-red-600">{`出金: ${(payload[2].value as number).toLocaleString()}円`}</p>}
       </div>
     );
   }
