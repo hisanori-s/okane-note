@@ -15,14 +15,15 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { ComposedChart, Line, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'
 
 import { TransactionLog, Task, DailyWorkRecord } from '@/types'
-import { initialTransactionLogs, initialTasks } from '@/data/initial-data'
+import { dummyTransactions } from '@/lib/supabase/dummy/transactions'
+import { dummyTasks } from '@/lib/supabase/dummy/tasks'
 import { formatDate, getNextSunday } from '@/lib/date-utils'
 import { calculateCompoundInterest } from '@/lib/financial-utils'
 
 // アニメーション付きの報酬表示コンポーネント
 function AnimatedReward({ reward, isCompleted, isAnimating, isQuest }: { reward: number; isCompleted: boolean; isAnimating: boolean; isQuest: boolean }) {
   return (
-    <span 
+    <span
       className={`
         inline-block ml-2 font-bold
         transition-opacity duration-300 ease-in-out
@@ -51,20 +52,20 @@ function QuestBoard({ tasks, onToggleTask, onBack }: { tasks: Task[], onToggleTa
         <ul className="space-y-2">
           {quests.map(quest => (
             <li key={quest.id} className="flex items-center space-x-2">
-              <Checkbox 
+              <Checkbox
                 id={`quest-${quest.id}`}
                 checked={quest.completed}
                 onCheckedChange={() => onToggleTask(quest.id)}
                 disabled={quest.completed}
               />
-              <label 
+              <label
                 htmlFor={`quest-${quest.id}`}
                 className={`flex-grow ${quest.completed ? 'font-bold text-foreground' : 'text-muted-foreground'}`}
               >
                 {quest.title}
-                <AnimatedReward 
-                  reward={quest.reward} 
-                  isCompleted={quest.completed} 
+                <AnimatedReward
+                  reward={quest.reward}
+                  isCompleted={quest.completed}
                   isAnimating={false}
                   isQuest={true}
                 />
@@ -204,7 +205,7 @@ function TransactionHistory({ transactions, onClose }: { transactions: Transacti
   }
 
   return (
-    <div 
+    <div
       className="fixed inset-0 bg-background z-50 p-4 overflow-auto"
       onTouchStart={handleTouchStart}
       onTouchMove={handleTouchMove}
@@ -257,13 +258,13 @@ const CustomTooltip = ({ active, payload, label }: any) => {
 
 // メインのOkaneNoteコンポーネント
 export function OkaneNote() {
-  const [tasks, setTasks] = useState<Task[]>(initialTasks);
+  const [tasks, setTasks] = useState<Task[]>(dummyTasks);
   const [showQuestBoard, setShowQuestBoard] = useState<boolean>(false);
   const [touchStart, setTouchStart] = useState<number | null>(null);
   const [touchEnd, setTouchEnd] = useState<number | null>(null);
   const [animatingTaskId, setAnimatingTaskId] = useState<number | null>(null);
   const [transactionPopup, setTransactionPopup] = useState<{ isOpen: boolean; type: 'deposit' | 'withdrawal' } | null>(null);
-  const [transactionLogs, setTransactionLogs] = useState<TransactionLog[]>(initialTransactionLogs);
+  const [transactionLogs, setTransactionLogs] = useState<TransactionLog[]>(dummyTransactions);
   const [isWorkDayCompleted, setIsWorkDayCompleted] = useState(false);
   const [confirmationDialog, setConfirmationDialog] = useState<{ isOpen: boolean; taskId: number | null }>({ isOpen: false, taskId: null });
   const [isCalculating, setIsCalculating] = useState(false);
@@ -305,9 +306,9 @@ export function OkaneNote() {
   const getLast30DaysData = () => {
     const thirtyDaysAgo = new Date();
     thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
-    
+
     const filteredLogs = transactionLogs.filter(log => new Date(log.timestamp) >= thirtyDaysAgo);
-    
+
     let lastBalance = filteredLogs[0]?.balance || 0;
     const chartData = filteredLogs.map(log => {
       const data = {
@@ -337,10 +338,10 @@ export function OkaneNote() {
     setIsCalculating(true);
     setTimeout(() => {
       const lastBalance = transactionLogs[transactionLogs.length - 1]?.balance || 0;
-      const newBalance = newTransaction.category === 'income' 
-        ? lastBalance + newTransaction.amount 
+      const newBalance = newTransaction.category === 'income'
+        ? lastBalance + newTransaction.amount
         : lastBalance - newTransaction.amount;
-      
+
       const transaction: TransactionLog = {
         ...newTransaction,
         id: transactionLogs.length + 1,
@@ -460,7 +461,7 @@ export function OkaneNote() {
       const currentDate = new Date().toDateString();
       if (currentDate !== lastSavedDate.current) {
         const daysBetween = Math.floor((new Date(currentDate).getTime() - new Date(lastSavedDate.current).getTime()) / (1000 * 3600 * 24));
-        
+
         if (daysBetween <= 7) {
           // 7日以内の場合、全ての日のログを作成
           for (let i = 1; i <= daysBetween; i++) {
@@ -476,11 +477,11 @@ export function OkaneNote() {
             saveDailyWorkRecord();
           }
         }
-        
+
         lastSavedDate.current = currentDate;
         setIsWorkDayCompleted(false);
         // タスクのリセット処理をここに追加
-        setTasks(initialTasks.map(task => ({ ...task, completed: false })));
+        setTasks(dummyTasks.map(task => ({ ...task, completed: false })));
       }
     };
 
@@ -503,7 +504,7 @@ export function OkaneNote() {
   }, []);
 
   return (
-    <div 
+    <div
       className="max-w-md mx-auto p-4 space-y-4"
       onTouchStart={handleTouchStart}
       onTouchMove={handleTouchMove}
@@ -537,7 +538,7 @@ export function OkaneNote() {
         <Button onClick={() => openTransactionPopup('deposit')} className="flex-1 text-lg py-6">入金</Button>
         <Button onClick={() => openTransactionPopup('withdrawal')} className="flex-1 text-lg py-6">出金</Button>
       </div>
-      
+
       <Card>
         <CardHeader className="pb-2">
           <div className="flex justify-between items-center">
@@ -567,11 +568,11 @@ export function OkaneNote() {
           </div>
         </CardContent>
       </Card>
-      
+
       {showQuestBoard ? (
-        <QuestBoard 
-          tasks={tasks} 
-          onToggleTask={handleQuestCompletion} 
+        <QuestBoard
+          tasks={tasks}
+          onToggleTask={handleQuestCompletion}
           onBack={() => setShowQuestBoard(false)}
         />
       ) : (
@@ -583,13 +584,13 @@ export function OkaneNote() {
             <ul className="space-y-2">
               {tasks.filter(task => (task.category === 'お仕事' && task.isValid) || (task.category === 'クエスト' && task.completed)).map(task => (
                 <li key={task.id} className="flex items-center space-x-2">
-                  <Checkbox 
+                  <Checkbox
                     id={`task-${task.id}`}
                     checked={task.completed}
                     onCheckedChange={() => task.category === 'クエスト' ? null : toggleTask(task.id)}
                     disabled={isWorkDayCompleted || task.category === 'クエスト'}
                   />
-                  <label 
+                  <label
                     htmlFor={`task-${task.id}`}
                     className={`flex-grow ${task.completed ? 'font-bold text-foreground' : 'text-muted-foreground'}`}
                   >
@@ -597,9 +598,9 @@ export function OkaneNote() {
                     {task.category === 'クエスト' && (
                       <span className="ml-1 text-sm text-muted-foreground">(クエスト)</span>
                     )}
-                    <AnimatedReward 
-                      reward={task.reward} 
-                      isCompleted={task.completed} 
+                    <AnimatedReward
+                      reward={task.reward}
+                      isCompleted={task.completed}
                       isAnimating={animatingTaskId === task.id}
                       isQuest={task.category === 'クエスト'}
                     />
@@ -624,7 +625,7 @@ export function OkaneNote() {
           </CardFooter>
         </Card>
       )}
-      
+
       <div className="text-center text-sm text-muted-foreground">
         <ArrowLeftRight className="inline mr-1" size={16} />
         左右スワイプで臨時仕事とお仕事リストを切り替え
@@ -646,9 +647,9 @@ export function OkaneNote() {
       />
 
       {showHistory && (
-        <TransactionHistory 
-          transactions={transactionLogs} 
-          onClose={() => setShowHistory(false)} 
+        <TransactionHistory
+          transactions={transactionLogs}
+          onClose={() => setShowHistory(false)}
         />
       )}
 
