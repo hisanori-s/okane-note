@@ -14,86 +14,10 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { ComposedChart, Line, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'
 
-// 日付をフォーマットする関数
-function formatDate(date: Date): string {
-  const month = (date.getMonth() + 1).toString().padStart(2, '0');
-  const day = date.getDate().toString().padStart(2, '0');
-  const weekDay = ['日', '月', '火', '水', '木', '金', '土'][date.getDay()];
-  return `${month}/${day}(${weekDay})`;
-}
-
-// 次の日曜日を取得する関数
-function getNextSunday(date: Date): Date {
-  const result = new Date(date);
-  result.setDate(date.getDate() + (7 - date.getDay()) % 7);
-  return result;
-}
-
-// 複利計算を行う関数
-function calculateCompoundInterest(principal: number, rate: number): number {
-  return Math.floor(principal * (1 + rate));
-}
-
-// トランザクションログのインターフェース
-interface TransactionLog {
-  id: number;
-  timestamp: string;
-  amount: number;
-  balance: number;
-  title: string;
-  note: string;
-  category: 'income' | 'expense';
-  isValid: boolean;
-}
-
-// 日々の仕事記録のインターフェース
-interface DailyWorkRecord {
-  id: number;
-  userId: number;
-  date: string;
-  scheduledTasksCount: number;
-  completedTasksCount: number;
-  maxPossibleReward: number;
-  scheduledTasks: {
-    id: number;
-    title: string;
-    reward: number;
-  }[];
-  completedTasks: {
-    id: number;
-    title: string;
-    reward: number;
-  }[];
-}
-
-// タスクのインターフェース
-interface Task {
-  id: number;
-  category: 'お仕事' | 'クエスト';
-  isValid: boolean;
-  title: string;
-  note: string;
-  reward: number;
-  completed: boolean;
-}
-
-// トランザクションログのダミーデータ
-const initialTransactionLogs: TransactionLog[] = [
-  { id: 1, timestamp: "2024-01-01T12:00:00Z", amount: 10000, balance: 10000, title: "お小遣い", note: "初期入金", category: "income", isValid: true },
-  { id: 2, timestamp: "2024-10-01T09:00:00Z", amount: 120, balance: 10120, title: "お仕事報酬", note: "", category: "income", isValid: true },
-  { id: 3, timestamp: "2024-10-05T14:30:00Z", amount: 220, balance: 9900, title: "おかし", note: "", category: "expense", isValid: true },
-  { id: 4, timestamp: "2024-10-10T10:15:00Z", amount: 130, balance: 10030, title: "お仕事報酬", note: "追加タスク", category: "income", isValid: true },
-  { id: 5, timestamp: "2024-10-15T16:45:00Z", amount: 330, balance: 9700, title: "おもちゃ", note: "", category: "expense", isValid: true },
-];
-
-// タスクのダミーデータ
-const tasksData: Task[] = [
-  { id: 1, category: 'お仕事', isValid: true, title: "お風呂を洗う", note: "毎日の習慣づけ", reward: 10, completed: false },
-  { id: 2, category: 'お仕事', isValid: true, title: "食器を片付けた後のテーブルを拭く", note: "食事の後片付け", reward: 10, completed: false },
-  { id: 3, category: 'クエスト', isValid: true, title: "台所の拭き掃除", note: "特別な掃除タスク", reward: 20, completed: false },
-  { id: 4, category: 'クエスト', isValid: true, title: "玄関の掃き掃除", note: "外回りの掃除", reward: 20, completed: false },
-  { id: 5, category: 'クエスト', isValid: true, title: "肩たたき", note: "家族のケア", reward: 10, completed: false },
-];
+import { TransactionLog, Task, DailyWorkRecord } from '@/types'
+import { initialTransactionLogs, initialTasks } from '@/data/initial-data'
+import { formatDate, getNextSunday } from '@/lib/date-utils'
+import { calculateCompoundInterest } from '@/lib/financial-utils'
 
 // アニメーション付きの報酬表示コンポーネント
 function AnimatedReward({ reward, isCompleted, isAnimating, isQuest }: { reward: number; isCompleted: boolean; isAnimating: boolean; isQuest: boolean }) {
@@ -333,7 +257,7 @@ const CustomTooltip = ({ active, payload, label }: any) => {
 
 // メインのOkaneNoteコンポーネント
 export function OkaneNote() {
-  const [tasks, setTasks] = useState<Task[]>(tasksData);
+  const [tasks, setTasks] = useState<Task[]>(initialTasks);
   const [showQuestBoard, setShowQuestBoard] = useState<boolean>(false);
   const [touchStart, setTouchStart] = useState<number | null>(null);
   const [touchEnd, setTouchEnd] = useState<number | null>(null);
@@ -556,7 +480,7 @@ export function OkaneNote() {
         lastSavedDate.current = currentDate;
         setIsWorkDayCompleted(false);
         // タスクのリセット処理をここに追加
-        setTasks(tasksData.map(task => ({ ...task, completed: false })));
+        setTasks(initialTasks.map(task => ({ ...task, completed: false })));
       }
     };
 
