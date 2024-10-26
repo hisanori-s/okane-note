@@ -1,86 +1,56 @@
 'use client';
 
-import { useState } from 'react';
-import { Checkbox } from "@/components/ui/checkbox";
-import { Label } from "@/components/ui/label";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Input } from "@/components/ui/input";
+import { useState, useEffect } from 'react';
+import { getQuests } from "@/lib/supabase/client";
+import type { Quest } from '@/types';
 
 interface SettingQuestProps {
     isEditMode: boolean;
 }
 
 export default function SettingQuest({ isEditMode }: SettingQuestProps) {
-    const [settings, setSettings] = useState({
-        checkbox1: false,
-        checkbox2: false,
-        radio: "option1",
-        textField: "",
-        selectField: "1"
-    });
+    const [quests, setQuests] = useState<Quest[]>([]);
 
-    const handleChange = (field: string, value: string | boolean) => {
-        setSettings(prev => ({ ...prev, [field]: value }));
+    useEffect(() => {
+        const fetchQuests = async () => {
+            const fetchedQuests = await getQuests();
+            setQuests(fetchedQuests);
+        };
+        fetchQuests();
+    }, []);
+
+    const getExecutionDaysText = (quest: Quest) => {
+        if (quest.frequency === 'weekly') {
+            const days = ['日', '月', '火', '水', '木', '金', '土'];
+            return quest.executionDays.map(day => days[day]).join(', ');
+        } else {
+            return quest.executionDays.join(', ') + '日';
+        }
     };
 
     return (
         <div className="border p-4 rounded-md my-4">
             <h2 className="text-xl font-semibold mb-4">クエストボード関係の設定</h2>
-            <div className="space-y-4">
-                <div className="flex items-center space-x-2">
-                    <Checkbox
-                        id="quest-checkbox1"
-                        checked={settings.checkbox1}
-                        onCheckedChange={(checked) => handleChange('checkbox1', checked)}
-                        disabled={!isEditMode}
-                    />
-                    <Label htmlFor="quest-checkbox1">チェックボックス1</Label>
-                </div>
-                <div className="flex items-center space-x-2">
-                    <Checkbox
-                        id="quest-checkbox2"
-                        checked={settings.checkbox2}
-                        onCheckedChange={(checked) => handleChange('checkbox2', checked)}
-                        disabled={!isEditMode}
-                    />
-                    <Label htmlFor="quest-checkbox2">チェックボックス2</Label>
-                </div>
-                <RadioGroup
-                    value={settings.radio}
-                    onValueChange={(value) => handleChange('radio', value)}
-                    disabled={!isEditMode}
-                >
-                    <div className="flex items-center space-x-2">
-                        <RadioGroupItem value="option1" id="quest-radio1" />
-                        <Label htmlFor="quest-radio1">オプション1</Label>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                        <RadioGroupItem value="option2" id="quest-radio2" />
-                        <Label htmlFor="quest-radio2">オプション2</Label>
-                    </div>
-                </RadioGroup>
-                <Input
-                    placeholder="テキストフィールド"
-                    value={settings.textField}
-                    onChange={(e) => handleChange('textField', e.target.value)}
-                    disabled={!isEditMode}
-                />
-                <Select
-                    value={settings.selectField}
-                    onValueChange={(value) => handleChange('selectField', value)}
-                    disabled={!isEditMode}
-                >
-                    <SelectTrigger>
-                        <SelectValue placeholder="数字を選択" />
-                    </SelectTrigger>
-                    <SelectContent>
-                        {Array.from({length: 30}, (_, i) => i + 1).map((num) => (
-                            <SelectItem key={num} value={num.toString()}>{num}</SelectItem>
-                        ))}
-                    </SelectContent>
-                </Select>
-            </div>
+            <table className="w-full">
+                <thead>
+                    <tr>
+                        <th className="text-left">タイトル</th>
+                        <th className="text-left">頻度</th>
+                        <th className="text-left">実行日</th>
+                        <th className="text-left">報酬</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {quests.map(quest => (
+                        <tr key={quest.id}>
+                            <td>{quest.title}</td>
+                            <td>{quest.frequency === 'weekly' ? '毎週' : '毎月'}</td>
+                            <td>{getExecutionDaysText(quest)}</td>
+                            <td>{quest.reward}円</td>
+                        </tr>
+                    ))}
+                </tbody>
+            </table>
         </div>
     );
 }

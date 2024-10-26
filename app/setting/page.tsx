@@ -18,8 +18,8 @@ export default function SettingPage() {
             <h1 className="text-2xl font-bold mb-4">設定</h1>
             <SettingPassword onEditModeChange={handleEditModeChange} />
             <SettingCompoundInterest isEditMode={isEditMode} />
-            <SettingQuest isEditMode={isEditMode} />
             <SettingWork isEditMode={isEditMode} />
+            <SettingQuest isEditMode={isEditMode} />
         </div>
     );
 }

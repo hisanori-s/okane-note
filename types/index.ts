@@ -38,16 +38,46 @@ export interface Task {
   completed: boolean;
 }
 
-export type SettingsSection = {
-  checkbox1: boolean;
-  checkbox2: boolean;
-  radio: string;
-  textField: string;
-  selectField: string;
-};
+export interface SettingsSection {
+  interestRate?: string;
+  paymentSpan?: string;
+  paymentDay?: string;
+  paymentDate?: string;
+  checkbox1?: boolean;
+  checkbox2?: boolean;
+}
 
-export type Settings = {
+export interface Settings {
   compoundInterest: SettingsSection;
   workList: SettingsSection;
   questBoard: SettingsSection;
-};
+}
+
+export type ExecutionSpan = 'weekly' | 'monthly';
+
+export interface Work {
+  id: number;
+  title: string;
+  executionSpan: ExecutionSpan;
+  executionDays: number[]; // 週の場合は0-6（日-土）、月の場合は1-31
+  reward: number;
+  isValid: boolean;
+  note: string;
+}
+
+export interface WorkSettings {
+  paymentSpan: ExecutionSpan;
+  paymentDay: number; // 週の場合は0-6、月の場合は1-31
+}
+
+export type QuestFrequency = 'weekly' | 'monthly';
+
+export interface Quest {
+  id: number;
+  title: string;
+  frequency: QuestFrequency;
+  executionDays: number[]; // 週の場合は0-6（日-土）、月の場合は1-31
+  description: string;
+  reward: number;
+  isValid: boolean;
+}

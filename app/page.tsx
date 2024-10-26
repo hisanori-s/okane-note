@@ -4,26 +4,31 @@ import { useState, useEffect } from "react"
 import { OkaneNoteHeader } from "@/app/components/okane-note-header"
 import { OkaneNoteBalance } from "@/app/components/okane-note-balance"
 import { OkaneNoteWork } from "@/app/components/okane-note-work"
-import { TransactionLog } from '@/types'
-import { getTransactions } from '@/lib/supabase/client'
+import { TransactionLog, Work } from '@/types'
+import { getTransactions, getWorks } from '@/lib/supabase/client'
 
 export default function Page() {
   const [transactionLogs, setTransactionLogs] = useState<TransactionLog[]>([]);
+  const [works, setWorks] = useState<Work[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    const fetchTransactions = async () => {
+    const fetchData = async () => {
       try {
-        const transactions = await getTransactions();
+        const [transactions, fetchedWorks] = await Promise.all([
+          getTransactions(),
+          getWorks()
+        ]);
         setTransactionLogs(transactions);
+        setWorks(fetchedWorks);
       } catch (error) {
-        console.error("Failed to fetch transactions:", error);
+        console.error("Failed to fetch data:", error);
         // エラーハンドリングを行う（例：ユーザーに通知する）
       } finally {
         setIsLoading(false);
       }
     };
-    fetchTransactions();
+    fetchData();
   }, []);
 
   const addTransaction = (newTransaction: Omit<TransactionLog, 'id' | 'timestamp' | 'balance' | 'isValid'>) => {
@@ -49,6 +54,21 @@ export default function Page() {
     return <div>Loading...</div>; // またはスケルトンローダーを表示
   }
 
+  // 今日の日付を取得
+  const today = new Date();
+  const dayOfWeek = today.getDay();
+  const dayOfMonth = today.getDate();
+
+  // 今日のお仕事リストをフィルタリング
+  const todaysWorks = works.filter(work => {
+    if (work.executionSpan === 'weekly') {
+      return work.executionDays.includes(dayOfWeek);
+    } else if (work.executionSpan === 'monthly') {
+      return work.executionDays.includes(dayOfMonth);
+    }
+    return false;
+  });
+
   return (
     <div className="max-w-md mx-auto p-4 space-y-4">
       <OkaneNoteHeader />
@@ -56,7 +76,10 @@ export default function Page() {
         transactionLogs={transactionLogs}
         addTransaction={addTransaction}
       />
-      <OkaneNoteWork addTransaction={addTransaction} />
+      <OkaneNoteWork
+        works={todaysWorks}
+        addTransaction={addTransaction}
+      />
     </div>
   )
 }

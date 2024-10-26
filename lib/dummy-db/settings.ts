@@ -7,17 +7,8 @@ export const dummySettings: Settings = {
     paymentDay: "0" // 日曜日の初期値（0）
   },
   workList: {
-    checkbox1: false,
-    checkbox2: false,
-    radio: "option1",
-    textField: "",
-    selectField: "1"
+    paymentSpan: "weekly",
+    paymentDay: "0"
   },
-  questBoard: {
-    checkbox1: false,
-    checkbox2: false,
-    radio: "option1",
-    textField: "",
-    selectField: "1"
-  }
+  questBoard: {}
 }

@@ -27,15 +27,18 @@ export default function SettingCompoundInterest({ isEditMode }: SettingCompoundI
             <h2 className="text-xl font-semibold mb-4">複利に関する設定</h2>
             <div className="space-y-4">
                 <h3 className="text-lg font-semibold">利率設定</h3>
-                <Input
-                    type="number"
-                    step="0.05"
-                    min="0.05"
-                    placeholder="利率（例: 0.5）"
-                    value={settings.interestRate}
-                    onChange={(e) => handleChange('interestRate', e.target.value)}
-                    disabled={!isEditMode}
-                />
+                <div className="flex items-center">
+                    <Input
+                        type="number"
+                        step="0.05"
+                        min="0.05"
+                        placeholder="利率（例: 0.5）"
+                        value={settings.interestRate}
+                        onChange={(e) => handleChange('interestRate', e.target.value)}
+                        disabled={!isEditMode}
+                    />
+                    <span className="ml-2">%</span> {/* パーセント記号を追加 */}
+                </div>
                 <h3 className="text-lg font-semibold">支払いスパン設定</h3>
                 <RadioGroup
                     value={settings.paymentSpan}

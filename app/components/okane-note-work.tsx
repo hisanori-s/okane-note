@@ -5,8 +5,9 @@ import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/componen
 import { Checkbox } from "@/components/ui/checkbox"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog"
 
-import { TransactionLog, Task, DailyWorkRecord } from '@/types'
-import { getTasks } from '@/lib/supabase/client'
+import { TransactionLog, Work, DailyWorkRecord } from '@/types'
+import { getWorks, getQuests } from '@/lib/supabase/client'
+import type { Quest } from '@/types'
 
 // アニメーション付きの報酬表示コンポーネント（お仕事セクション）
 function AnimatedReward({ reward, isCompleted, isAnimating, isQuest }: { reward: number; isCompleted: boolean; isAnimating: boolean; isQuest: boolean }) {
@@ -28,8 +29,25 @@ function AnimatedReward({ reward, isCompleted, isAnimating, isQuest }: { reward:
 }
 
 // QuestBoardコンポーネント（クエストボード）
-function QuestBoard({ tasks, onToggleTask, onBack }: { tasks: Task[], onToggleTask: (id: number) => void, onBack: () => void }) {
-  const quests = tasks.filter(task => task.category === 'クエスト' && task.isValid);
+function QuestBoard({ onToggleQuest, onBack }: { onToggleQuest: (id: number) => void, onBack: () => void }) {
+  const [quests, setQuests] = useState<Quest[]>([]);
+
+  useEffect(() => {
+    const fetchQuests = async () => {
+      const fetchedQuests = await getQuests();
+      setQuests(fetchedQuests.filter(quest => quest.isValid));
+    };
+    fetchQuests();
+  }, []);
+
+  const getExecutionDaysText = (quest: Quest) => {
+    if (quest.frequency === 'weekly') {
+      const days = ['日', '月', '火', '水', '木', '金', '土'];
+      return quest.executionDays.map(day => days[day]).join(', ');
+    } else {
+      return quest.executionDays.join(', ') + '日';
+    }
+  };
 
   return (
     <Card>
@@ -42,21 +60,14 @@ function QuestBoard({ tasks, onToggleTask, onBack }: { tasks: Task[], onToggleTa
             <li key={quest.id} className="flex items-center space-x-2">
               <Checkbox
                 id={`quest-${quest.id}`}
-                checked={quest.completed}
-                onCheckedChange={() => onToggleTask(quest.id)}
-                disabled={quest.completed}
+                onCheckedChange={() => onToggleQuest(quest.id)}
               />
               <label
                 htmlFor={`quest-${quest.id}`}
-                className={`flex-grow ${quest.completed ? 'font-bold text-foreground' : 'text-muted-foreground'}`}
+                className="flex-grow text-muted-foreground"
               >
-                {quest.title}
-                <AnimatedReward
-                  reward={quest.reward}
-                  isCompleted={quest.completed}
-                  isAnimating={false}
-                  isQuest={true}
-                />
+                {quest.title} ({quest.frequency === 'weekly' ? '毎週' : '毎月'}: {getExecutionDaysText(quest)})
+                <span className="ml-2 text-green-600">+{quest.reward}円</span>
               </label>
             </li>
           ))}
@@ -95,7 +106,8 @@ function ConfirmationDialog({ isOpen, onClose, onConfirm, title, message }: { is
 
 // お仕事セクション
 export function OkaneNoteWork({ addTransaction }: { addTransaction: (newTransaction: Omit<TransactionLog, 'id' | 'timestamp' | 'balance' | 'isValid'>) => void }) {
-  const [tasks, setTasks] = useState<Task[]>([]);
+  const [works, setWorks] = useState<Work[]>([]);
+  const [todaysWorks, setTodaysWorks] = useState<Work[]>([]);
   const [showQuestBoard, setShowQuestBoard] = useState<boolean>(false);
   const [touchStart, setTouchStart] = useState<number | null>(null);
   const [touchEnd, setTouchEnd] = useState<number | null>(null);
@@ -103,19 +115,19 @@ export function OkaneNoteWork({ addTransaction }: { addTransaction: (newTransact
   const [isWorkDayCompleted, setIsWorkDayCompleted] = useState(false);
   const [confirmationDialog, setConfirmationDialog] = useState<{ isOpen: boolean; taskId: number | null }>({ isOpen: false, taskId: null });
   const [isCalculating, setIsCalculating] = useState(false);
-  const lastSavedDate = useRef(new Date().toDateString()); // この行を追加
+  const lastSavedDate = useRef(new Date().toDateString());
 
   const toggleTask = (id: number) => {
-    setTasks(tasks.map(task => {
-      if (task.id === id) {
-        const newCompleted = !task.completed;
+    setTodaysWorks(prevWorks => prevWorks.map(work => {
+      if (work.id === id) {
+        const newCompleted = !work.completed;
         if (newCompleted) {
           setAnimatingTaskId(id);
           setTimeout(() => setAnimatingTaskId(null), 500);
         }
-        return { ...task, completed: newCompleted };
+        return { ...work, completed: newCompleted };
       }
-      return task;
+      return work;
     }));
   };
 
@@ -140,30 +152,33 @@ export function OkaneNoteWork({ addTransaction }: { addTransaction: (newTransact
   const saveDailyWorkRecord = useCallback(() => {
     setIsCalculating(true);
     setTimeout(() => {
-      const completedTasks = tasks.filter(task => task.completed && task.category === 'お仕事');
+      const completedWorks = todaysWorks.filter(work => work.completed);
       const dailyRecord: DailyWorkRecord = {
         id: Date.now(),
         userId: 1, // 仮のユーザーID
         date: new Date().toISOString().split('T')[0],
-        scheduledTasksCount: tasks.filter(task => task.category === 'お仕事').length,
-        completedTasksCount: completedTasks.length,
-        maxPossibleReward: tasks.filter(task => task.category === 'お仕事').reduce((sum, task) => sum + task.reward, 0),
-        scheduledTasks: tasks.filter(task => task.category === 'お仕事').map(({ id, title, reward }) => ({ id, title, reward })),
-        completedTasks: completedTasks.map(({ id, title, reward }) => ({ id, title, reward })),
+        scheduledTasksCount: todaysWorks.length,
+        completedTasksCount: completedWorks.length,
+        maxPossibleReward: todaysWorks.reduce((sum, work) => sum + work.reward, 0),
+        scheduledTasks: todaysWorks.map(({ id, title, reward }) => ({ id, title, reward })),
+        completedTasks: completedWorks.map(({ id, title, reward }) => ({ id, title, reward })),
       };
       console.log('Daily work record saved:', dailyRecord);
       setIsWorkDayCompleted(true);
       setIsCalculating(false);
     }, 1000);
-  }, [tasks]); // tasks を依存配列に追加
+  }, [todaysWorks]);
 
-  const handleQuestCompletion = (taskId: number) => {
-    setConfirmationDialog({ isOpen: true, taskId });
+  const handleQuestCompletion = (questId: number) => {
+    const quest = works.find(q => q.id === questId);
+    if (quest) {
+      setConfirmationDialog({ isOpen: true, taskId: questId });
+    }
   };
 
   const confirmQuestCompletion = () => {
     if (confirmationDialog.taskId !== null) {
-      const quest = tasks.find(task => task.id === confirmationDialog.taskId);
+      const quest = works.find(work => work.id === confirmationDialog.taskId);
       if (quest) {
         toggleTask(quest.id);
         addTransaction({
@@ -201,9 +216,11 @@ export function OkaneNoteWork({ addTransaction }: { addTransaction: (newTransact
 
         lastSavedDate.current = currentDate;
         setIsWorkDayCompleted(false);
-        // タスクのリセット処理をここに追加
-        const fetchedTasks = await getTasks();
-        setTasks(fetchedTasks.map(task => ({ ...task, completed: false })));
+
+        // 仕事のリセットと今日の仕事のフィルタリング
+        const fetchedWorks = await getWorks();
+        setWorks(fetchedWorks);
+        filterTodaysWorks(fetchedWorks);
       }
     };
 
@@ -211,7 +228,7 @@ export function OkaneNoteWork({ addTransaction }: { addTransaction: (newTransact
     const intervalId = setInterval(handleDateChange, 60000); // 1分ごとにチェック
 
     return () => clearInterval(intervalId);
-  }, [saveDailyWorkRecord]); // saveDailyWorkRecord を依存配列に追加
+  }, []);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -226,12 +243,30 @@ export function OkaneNoteWork({ addTransaction }: { addTransaction: (newTransact
   }, []);
 
   useEffect(() => {
-    const fetchTasks = async () => {
-      const fetchedTasks = await getTasks();
-      setTasks(fetchedTasks);
+    const fetchWorks = async () => {
+      const fetchedWorks = await getWorks();
+      setWorks(fetchedWorks);
+      filterTodaysWorks(fetchedWorks);
     };
-    fetchTasks();
+    fetchWorks();
   }, []);
+
+  const filterTodaysWorks = (allWorks: Work[]) => {
+    const today = new Date();
+    const dayOfWeek = today.getDay();
+    const dayOfMonth = today.getDate();
+
+    const filteredWorks = allWorks.filter(work => {
+      if (work.executionSpan === 'weekly') {
+        return work.executionDays.includes(dayOfWeek);
+      } else if (work.executionSpan === 'monthly') {
+        return work.executionDays.includes(dayOfMonth);
+      }
+      return false;
+    }).map(work => ({ ...work, completed: false }));
+
+    setTodaysWorks(filteredWorks);
+  };
 
   return (
     <div
@@ -241,8 +276,7 @@ export function OkaneNoteWork({ addTransaction }: { addTransaction: (newTransact
     >
       {showQuestBoard ? (
         <QuestBoard
-          tasks={tasks}
-          onToggleTask={handleQuestCompletion}
+          onToggleQuest={handleQuestCompletion}
           onBack={() => setShowQuestBoard(false)}
         />
       ) : (
@@ -252,27 +286,24 @@ export function OkaneNoteWork({ addTransaction }: { addTransaction: (newTransact
           </CardHeader>
           <CardContent>
             <ul className="space-y-2">
-              {tasks.filter(task => (task.category === 'お仕事' && task.isValid) || (task.category === 'クエスト' && task.completed)).map(task => (
-                <li key={task.id} className="flex items-center space-x-2">
+              {todaysWorks.map(work => (
+                <li key={work.id} className="flex items-center space-x-2">
                   <Checkbox
-                    id={`task-${task.id}`}
-                    checked={task.completed}
-                    onCheckedChange={() => task.category === 'クエスト' ? null : toggleTask(task.id)}
-                    disabled={isWorkDayCompleted || task.category === 'クエスト'}
+                    id={`work-${work.id}`}
+                    checked={work.completed}
+                    onCheckedChange={() => toggleTask(work.id)}
+                    disabled={isWorkDayCompleted}
                   />
                   <label
-                    htmlFor={`task-${task.id}`}
-                    className={`flex-grow ${task.completed ? 'font-bold text-foreground' : 'text-muted-foreground'}`}
+                    htmlFor={`work-${work.id}`}
+                    className={`flex-grow ${work.completed ? 'font-bold text-foreground' : 'text-muted-foreground'}`}
                   >
-                    {task.title}
-                    {task.category === 'クエスト' && (
-                      <span className="ml-1 text-sm text-muted-foreground">(クエスト)</span>
-                    )}
+                    {work.title}
                     <AnimatedReward
-                      reward={task.reward}
-                      isCompleted={task.completed}
-                      isAnimating={animatingTaskId === task.id}
-                      isQuest={task.category === 'クエスト'}
+                      reward={work.reward}
+                      isCompleted={work.completed}
+                      isAnimating={animatingTaskId === work.id}
+                      isQuest={false}
                     />
                   </label>
                 </li>
