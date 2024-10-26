@@ -1,0 +1,55 @@
+.
+├── app
+│   ├── components
+│   ├── fonts
+│   │   ├── GeistMonoVF.woff
+│   │   └── GeistVF.woff
+│   ├── setting
+│   │   └── page.tsx
+│   ├── favicon.ico
+│   ├── globals.css
+│   ├── layout.tsx
+│   └── page.tsx
+├── components
+│   ├── ui
+│   │   ├── button.tsx
+│   │   ├── card.tsx
+│   │   ├── checkbox.tsx
+│   │   ├── dialog.tsx
+│   │   ├── input.tsx
+│   │   ├── label.tsx
+│   │   ├── radio-group.tsx
+│   │   ├── select.tsx
+│   │   ├── switch.tsx
+│   │   └── textarea.tsx
+│   └── okane-note.tsx
+├── lib
+│   ├── db
+│   │   ├── settings.ts
+│   │   └── transactions.ts
+│   ├── supabase
+│   │   ├── dummy
+│   │   │   ├── settings.ts
+│   │   │   ├── tasks.ts
+│   │   │   └── transactions.ts
+│   │   └── client.ts
+│   ├── date-utils.ts
+│   ├── financial-utils.ts
+│   └── utils.ts
+├── types
+│   └── index.ts
+├── .cursorrules
+├── .editorconfig
+├── .env.local
+├── .eslintrc.json
+├── .gitignore
+├── components.json
+├── next-env.d.ts
+├── next.config.mjs
+├── okane-note.code-workspace
+├── package-lock.json
+├── package.json
+├── postcss.config.mjs
+├── README.md
+├── tailwind.config.ts
+└── tsconfig.json
