@@ -20,6 +20,7 @@ export default function SettingPassword({ onEditModeChange }: SettingPasswordPro
     const [isEditMode, setIsEditMode] = useState(false);
     const [showPasswordDialog, setShowPasswordDialog] = useState(false);
     const [password, setPassword] = useState('');
+    const [errorMessage, setErrorMessage] = useState(''); // エラーメッセージの状態を追加
 
     useEffect(() => {
         onEditModeChange(isEditMode);
@@ -39,8 +40,9 @@ export default function SettingPassword({ onEditModeChange }: SettingPasswordPro
         if (isCorrect) {
             setIsEditMode(true);
             setShowPasswordDialog(false);
+            setErrorMessage(''); // エラーメッセージをクリア
         } else {
-            alert('パスワードが間違っています。');
+            setErrorMessage('パスワードが間違っています。'); // エラーメッセージを設定
         }
         setPassword('');
     };
@@ -66,6 +68,9 @@ export default function SettingPassword({ onEditModeChange }: SettingPasswordPro
                             placeholder="パスワードを入力"
                             className="mb-2"
                         />
+                        {errorMessage && ( // エラーメッセージがある場合に表示
+                            <div className="text-red-500 mb-2">{errorMessage}</div>
+                        )}
                         <DialogFooter>
                             <Button type="submit">確認</Button>
                         </DialogFooter>
