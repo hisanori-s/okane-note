@@ -42,6 +42,8 @@ export function OkaneNoteHeader() {
               <p className="font-bold mb-2">お仕事の記録をつけよう！</p>
               <ul className="list-disc pl-5 space-y-2">
                 <li>今日の仕事が終わったら、「お仕事リスト」にチェックを入れて「お仕事終了」ボタンを押してください。</li>
+                <li>お仕事の報酬は、１週間に１回日曜日にもらえます。</li>
+                <li>クエストの報酬はその日のうちにもらえます。</li>
                 <li>クエストをクリアしたら、父に言ってください。</li>
               </ul>
             </div>
