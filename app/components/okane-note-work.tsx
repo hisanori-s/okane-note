@@ -178,7 +178,7 @@ export function OkaneNoteWork({ addTransaction }: { addTransaction: (newTransact
   };
 
   useEffect(() => {
-    const handleDateChange = () => {
+    const handleDateChange = async () => {
       const currentDate = new Date().toDateString();
       if (currentDate !== lastSavedDate.current) {
         const daysBetween = Math.floor((new Date(currentDate).getTime() - new Date(lastSavedDate.current).getTime()) / (1000 * 3600 * 24));
@@ -202,7 +202,8 @@ export function OkaneNoteWork({ addTransaction }: { addTransaction: (newTransact
         lastSavedDate.current = currentDate;
         setIsWorkDayCompleted(false);
         // タスクのリセット処理をここに追加
-        setTasks(dummyTasks.map(task => ({ ...task, completed: false })));
+        const fetchedTasks = await getTasks();
+        setTasks(fetchedTasks.map(task => ({ ...task, completed: false })));
       }
     };
 
