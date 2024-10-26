@@ -31,26 +31,32 @@ export default function SettingQuest({ isEditMode }: SettingQuestProps) {
     return (
         <div className="border p-4 rounded-md my-4">
             <h2 className="text-xl font-semibold mb-4">クエストボード関係の設定</h2>
-            <table className="w-full">
-                <thead>
-                    <tr>
-                        <th className="text-left">タイトル</th>
-                        <th className="text-left">頻度</th>
-                        <th className="text-left">実行日</th>
-                        <th className="text-left">報酬</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {quests.map(quest => (
-                        <tr key={quest.id}>
-                            <td>{quest.title}</td>
-                            <td>{quest.frequency === 'weekly' ? '毎週' : '毎月'}</td>
-                            <td>{getExecutionDaysText(quest)}</td>
-                            <td>{quest.reward}円</td>
+            {isEditMode ? (
+                // 編集モード用のUI
+                <p>編集モードです。ここに編集用のフォームなどを実装してください。</p>
+            ) : (
+                // 閲覧モード用のUI（既存のテーブル）
+                <table className="w-full">
+                    <thead>
+                        <tr>
+                            <th className="text-left">タイトル</th>
+                            <th className="text-left">頻度</th>
+                            <th className="text-left">実行日</th>
+                            <th className="text-left">報酬</th>
                         </tr>
-                    ))}
-                </tbody>
-            </table>
+                    </thead>
+                    <tbody>
+                        {quests.map(quest => (
+                            <tr key={quest.id}>
+                                <td>{quest.title}</td>
+                                <td>{quest.frequency === 'weekly' ? '毎週' : '毎月'}</td>
+                                <td>{getExecutionDaysText(quest)}</td>
+                                <td>{quest.reward}円</td>
+                            </tr>
+                        ))}
+                    </tbody>
+                </table>
+            )}
         </div>
     );
 }
