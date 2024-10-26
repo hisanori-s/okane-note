@@ -1,3 +1,4 @@
+'use client'
 import { useState, useEffect, useRef } from "react"
 import { X } from "lucide-react"
 import { Button } from "@/components/ui/button"
@@ -181,12 +182,18 @@ function TransactionHistory({ transactions, onClose }: { transactions: Transacti
 // カスタムツールチップコンポーネント（残高概要セクション）
 const CustomTooltip = ({ active, payload, label }: TooltipProps<ValueType, NameType>) => {
   if (active && payload && payload.length) {
+    const date = new Date(label as string).toLocaleDateString();
+    const data = payload[0].payload;
+    const balance = data.balance;
+    const income = data.income;
+    const expense = data.expense;
+
     return (
       <div className="bg-white p-4 border rounded shadow">
-        <p className="text-sm">{`日付: ${new Date(label as string).toLocaleDateString()}`}</p>
-        <p className="text-sm">{`残高: ${(payload[0].value as number).toLocaleString()}円`}</p>
-        {payload[1] && <p className="text-sm text-green-600">{`入金: ${(payload[1].value as number).toLocaleString()}円`}</p>}
-        {payload[2] && <p className="text-sm text-red-600">{`出金: ${(payload[2].value as number).toLocaleString()}円`}</p>}
+        <p className="text-sm">{`日付: ${date}`}</p>
+        <p className="text-sm">{`残高: ${balance.toLocaleString()}円`}</p>
+        {income > 0 && <p className="text-sm text-green-600">{`入金: ${income.toLocaleString()}円`}</p>}
+        {expense > 0 && <p className="text-sm text-red-600">{`出金: ${expense.toLocaleString()}円`}</p>}
       </div>
     );
   }
@@ -215,13 +222,15 @@ export function OkaneNoteBalance({ transactionLogs, addTransaction }: OkaneNoteB
 
     const filteredLogs = transactionLogs.filter(log => new Date(log.timestamp) >= thirtyDaysAgo);
 
-    // lastBalanceを削除し、直接filteredLogsを使用
-    return filteredLogs.map(log => ({
+    const result = filteredLogs.map(log => ({
       date: log.timestamp,
       balance: log.balance,
       income: log.category === 'income' ? log.amount : 0,
       expense: log.category === 'expense' ? log.amount : 0
     }));
+
+    console.log('Chart Data:', result);  // デバッグ用ログ
+    return result;
   };
 
   const chartData = getLast30DaysData();
