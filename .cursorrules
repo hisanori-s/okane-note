@@ -6,6 +6,9 @@
 │   │   ├── GeistMonoVF.woff
 │   │   └── GeistVF.woff
 │   ├── setting
+│   │   ├── page.tsx
+│   │   └── components
+│   │       ├── 必要コンポーネント
 │   ├── favicon.ico
 │   ├── globals.css
 │   ├── layout.tsx
