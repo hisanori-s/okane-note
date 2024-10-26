@@ -98,8 +98,13 @@ function ConfirmationDialog({ isOpen, onClose, onConfirm, title, message }: { is
   );
 }
 
+interface OkaneNoteWorkProps {
+  works: Work[];
+  addTransaction: (newTransaction: Omit<TransactionLog, "id" | "timestamp" | "balance" | "isValid">) => void;
+}
+
 // お仕事セクション
-export function OkaneNoteWork({ addTransaction }: { addTransaction: (newTransaction: Omit<TransactionLog, 'id' | 'timestamp' | 'balance' | 'isValid'>) => void }) {
+export function OkaneNoteWork({ works, addTransaction }: OkaneNoteWorkProps) {
   const [todaysWorks, setTodaysWorks] = useState<Work[]>([]);
   const [completedQuests, setCompletedQuests] = useState<Quest[]>([]);
   const [showQuestBoard, setShowQuestBoard] = useState<boolean>(false);
@@ -189,7 +194,7 @@ export function OkaneNoteWork({ addTransaction }: { addTransaction: (newTransact
       // クエスト達成の処理を実装
       setCompletedQuests(prev => [...prev, confirmationDialog.quest!]);
 
-      // トランザクションを追加
+      // トランザクショ���を追加
       addTransaction({
         amount: confirmationDialog.quest.reward,
         title: `クエスト報酬: ${confirmationDialog.quest.title}`,
@@ -253,12 +258,8 @@ export function OkaneNoteWork({ addTransaction }: { addTransaction: (newTransact
   }, []);
 
   useEffect(() => {
-    const fetchWorks = async () => {
-      const fetchedWorks = await getWorks();
-      filterTodaysWorks(fetchedWorks);
-    };
-    fetchWorks();
-  }, []);
+    filterTodaysWorks(works);
+  }, [works]);
 
   const filterTodaysWorks = (allWorks: Work[]) => {
     const today = new Date();
