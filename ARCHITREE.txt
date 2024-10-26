@@ -23,7 +23,6 @@
 │   │   ├── select.tsx
 │   │   ├── switch.tsx
 │   │   └── textarea.tsx
-│   └── okane-note.tsx（削除予定）
 ├── lib
 │   ├── db
 │   │   ├── settings.ts
