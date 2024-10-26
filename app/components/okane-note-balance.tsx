@@ -9,6 +9,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { ComposedChart, Line, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'
 import { TooltipProps } from 'recharts';
 import { NameType, ValueType } from 'recharts/types/component/DefaultTooltipContent';
+import Link from 'next/link';
 
 import { TransactionLog } from '@/types'
 import { formatDate, getNextSunday } from '@/lib/date-utils'
@@ -207,7 +208,6 @@ export function OkaneNoteBalance({ transactionLogs, addTransaction }: OkaneNoteB
   const [amount, setAmount] = useState('');
   const [title, setTitle] = useState('');
   const [note, setNote] = useState('');
-  const [showHistory, setShowHistory] = useState(false);
   const [isCalculating, setIsCalculating] = useState(false);
 
   const today = new Date();
@@ -301,7 +301,9 @@ export function OkaneNoteBalance({ transactionLogs, addTransaction }: OkaneNoteB
             </ResponsiveContainer>
           </div>
           <div className="flex justify-center mt-2">
-            <Button variant="outline" size="sm" onClick={() => setShowHistory(true)}>通帳を見る</Button>
+            <Link href="/lognote">
+              <Button variant="outline" size="sm">通帳を見る</Button>
+            </Link>
           </div>
         </CardContent>
       </Card>
@@ -312,13 +314,6 @@ export function OkaneNoteBalance({ transactionLogs, addTransaction }: OkaneNoteB
         type={transactionType === 'income' ? 'deposit' : 'withdrawal'}
         onSubmit={handleAddTransaction}
       />
-
-      {showHistory && (
-        <TransactionHistory
-          transactions={transactionLogs}
-          onClose={() => setShowHistory(false)}
-        />
-      )}
     </>
   );
 }
