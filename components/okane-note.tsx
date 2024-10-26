@@ -16,7 +16,7 @@ import { ComposedChart, Line, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Respons
 import { TooltipProps } from 'recharts';
 import { NameType, ValueType } from 'recharts/types/component/DefaultTooltipContent';
 
-import { TransactionLog, Task, DailyWorkRecord } from '@/types'
+import { TransactionLog, Task, DailyWorkRecord, SettingsSection, SettingsData } from '@/types'
 import { dummyTransactions } from '@/lib/supabase/dummy/transactions'
 import { dummyTasks } from '@/lib/supabase/dummy/tasks'
 import { formatDate, getNextSunday } from '@/lib/date-utils'
@@ -273,22 +273,6 @@ const CustomTooltip = ({ active, payload, label }: TooltipProps<ValueType, NameT
     );
   }
   return null;
-};
-
-// settingsDataの型を定義（設定セクション）
-type SettingsSection = {
-  checkbox1: boolean;
-  checkbox2: boolean;
-  radio: string;
-  textField: string;
-  selectField: string;
-};
-
-// settingsDataの型を定義（仕事・クエストセクション）
-type SettingsData = {
-  compoundInterest: SettingsSection;
-  workList: SettingsSection;
-  questBoard: SettingsSection;
 };
 
 // メインのOkaneNoteコンポーネント

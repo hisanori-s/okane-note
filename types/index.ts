@@ -37,3 +37,17 @@ export interface Task {
   reward: number;
   completed: boolean;
 }
+
+export type SettingsSection = {
+  checkbox1: boolean;
+  checkbox2: boolean;
+  radio: string;
+  textField: string;
+  selectField: string;
+};
+
+export type SettingsData = {
+  compoundInterest: SettingsSection;
+  workList: SettingsSection;
+  questBoard: SettingsSection;
+};
