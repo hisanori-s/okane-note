@@ -1,3 +1,5 @@
+'use client';
+
 import React from 'react';
 import { TransactionLog } from '@/types';
 
@@ -6,6 +8,11 @@ interface TransactionHistoryProps {
 }
 
 export function TransactionHistory({ transactions }: TransactionHistoryProps) {
+  // 取引履歴を日付の降順でソート
+  const sortedTransactions = [...transactions].sort((a, b) =>
+    new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
+  );
+
   return (
     <div className="p-4">
       <div className="overflow-x-auto">
@@ -18,7 +25,7 @@ export function TransactionHistory({ transactions }: TransactionHistoryProps) {
             </tr>
           </thead>
           <tbody>
-            {transactions.map((transaction) => (
+            {sortedTransactions.map((transaction) => (
               <tr key={transaction.id} className="hover:bg-gray-50">
                 <td className="border border-gray-300 px-4 py-2">
                   {new Date(transaction.timestamp).toLocaleDateString()}
