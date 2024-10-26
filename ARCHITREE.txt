@@ -8,6 +8,10 @@
 │   │   ├── GeistMonoVF.woff
 │   │   └── GeistVF.woff
 │   ├── setting
+│   │   ├── components
+│   │   │   ├── setting-compound-interest.tsx
+│   │   │   ├── setting-work.tsx
+│   │   │   └── setting-quest.tsx
 │   │   └── page.tsx
 │   ├── favicon.ico
 │   ├── globals.css
