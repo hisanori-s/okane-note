@@ -1,14 +1,30 @@
 "use client";
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { OkaneNoteHeader } from "@/app/components/okane-note-header"
 import { OkaneNoteBalance } from "@/app/components/okane-note-balance"
 import { OkaneNoteWork } from "@/app/components/okane-note-work"
 import { TransactionLog } from '@/types'
-import { dummyTransactions } from '@/lib/supabase/dummy/transactions'
+import { getTransactions } from '@/lib/supabase/client'
 
 export default function Page() {
-  const [transactionLogs, setTransactionLogs] = useState<TransactionLog[]>(dummyTransactions);
+  const [transactionLogs, setTransactionLogs] = useState<TransactionLog[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchTransactions = async () => {
+      try {
+        const transactions = await getTransactions();
+        setTransactionLogs(transactions);
+      } catch (error) {
+        console.error("Failed to fetch transactions:", error);
+        // エラーハンドリングを行う（例：ユーザーに通知する）
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    fetchTransactions();
+  }, []);
 
   const addTransaction = (newTransaction: Omit<TransactionLog, 'id' | 'timestamp' | 'balance' | 'isValid'>) => {
     setTransactionLogs(prevLogs => {
@@ -28,6 +44,10 @@ export default function Page() {
       return [...prevLogs, transaction];
     });
   };
+
+  if (isLoading) {
+    return <div>Loading...</div>; // またはスケルトンローダーを表示
+  }
 
   return (
     <div className="max-w-md mx-auto p-4 space-y-4">

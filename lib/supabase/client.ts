@@ -1,12 +1,7 @@
-import { dummyTransactions } from './dummy/transactions'
-import { dummyTasks } from './dummy/tasks'
-import { dummySettings } from './dummy/settings'
+import { dummyTransactions } from '../dummy-db/transactions'
+import { dummyTasks } from '../dummy-db/tasks'
+import { dummySettings } from '../dummy-db/settings'
 import type { TransactionLog, Task, Settings } from '@/types'
-
-// Supabase関連のコードをコメントアウト
-// const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
-// const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
-// let supabaseClient: ReturnType<typeof createClient> | null = null
 
 export const initializeSupabase = () => {
     // 現時点では何もしない

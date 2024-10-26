@@ -31,14 +31,11 @@
 │   │   ├── switch.tsx
 │   │   └── textarea.tsx
 ├── lib
-│   ├── db
+│   ├── dummy-db
 │   │   ├── settings.ts
+│   │   ├── tasks.ts
 │   │   └── transactions.ts
 │   ├── supabase
-│   │   ├── dummy
-│   │   │   ├── settings.ts
-│   │   │   ├── tasks.ts
-│   │   │   └── transactions.ts
 │   │   └── client.ts
 │   ├── date-utils.ts
 │   ├── financial-utils.ts

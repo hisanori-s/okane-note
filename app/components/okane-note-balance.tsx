@@ -195,13 +195,17 @@ const CustomTooltip = ({ active, payload, label }: TooltipProps<ValueType, NameT
 
 // 残高概要セクション
 export function OkaneNoteBalance({ transactionLogs, addTransaction }: OkaneNoteBalanceProps) {
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [transactionType, setTransactionType] = useState<'income' | 'expense'>('income');
+  const [amount, setAmount] = useState('');
+  const [title, setTitle] = useState('');
+  const [note, setNote] = useState('');
   const [showHistory, setShowHistory] = useState(false);
-  const [transactionPopup, setTransactionPopup] = useState<{ isOpen: boolean; type: 'deposit' | 'withdrawal' } | null>(null);
   const [isCalculating, setIsCalculating] = useState(false);
 
   const today = new Date();
   const formattedDate = formatDate(today);
-  const latestBalance = transactionLogs[transactionLogs.length - 1].balance;
+  const latestBalance = transactionLogs.length > 0 ? transactionLogs[transactionLogs.length - 1].balance : 0;
   const nextSunday = getNextSunday(today);
   const nextInterestAmount = calculateCompoundInterest(latestBalance, 0.005) - latestBalance;
 
@@ -223,17 +227,18 @@ export function OkaneNoteBalance({ transactionLogs, addTransaction }: OkaneNoteB
   const chartData = getLast30DaysData();
 
   const openTransactionPopup = (type: 'deposit' | 'withdrawal') => {
-    setTransactionPopup({ isOpen: true, type });
+    setTransactionType(type === 'deposit' ? 'income' : 'expense');
+    setIsDialogOpen(true);
   };
 
   const closeTransactionPopup = () => {
-    setTransactionPopup(null);
+    setIsDialogOpen(false);
   };
 
   const handleAddTransaction = (newTransaction: Omit<TransactionLog, 'id' | 'timestamp' | 'balance' | 'isValid'>) => {
     setIsCalculating(true);
+    addTransaction(newTransaction);
     setTimeout(() => {
-      addTransaction(newTransaction);
       setIsCalculating(false);
     }, 1000);
   };
@@ -293,9 +298,9 @@ export function OkaneNoteBalance({ transactionLogs, addTransaction }: OkaneNoteB
       </Card>
 
       <TransactionPopup
-        isOpen={transactionPopup?.isOpen ?? false}
+        isOpen={isDialogOpen}
         onClose={closeTransactionPopup}
-        type={transactionPopup?.type ?? 'deposit'}
+        type={transactionType === 'income' ? 'deposit' : 'withdrawal'}
         onSubmit={handleAddTransaction}
       />
 

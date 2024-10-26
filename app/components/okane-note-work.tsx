@@ -6,7 +6,7 @@ import { Checkbox } from "@/components/ui/checkbox"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog"
 
 import { TransactionLog, Task, DailyWorkRecord } from '@/types'
-import { dummyTasks } from '@/lib/supabase/dummy/tasks'
+import { getTasks } from '@/lib/supabase/client'
 
 // アニメーション付きの報酬表示コンポーネント（お仕事セクション）
 function AnimatedReward({ reward, isCompleted, isAnimating, isQuest }: { reward: number; isCompleted: boolean; isAnimating: boolean; isQuest: boolean }) {
@@ -95,7 +95,7 @@ function ConfirmationDialog({ isOpen, onClose, onConfirm, title, message }: { is
 
 // お仕事セクション
 export function OkaneNoteWork({ addTransaction }: { addTransaction: (newTransaction: Omit<TransactionLog, 'id' | 'timestamp' | 'balance' | 'isValid'>) => void }) {
-  const [tasks, setTasks] = useState<Task[]>(dummyTasks);
+  const [tasks, setTasks] = useState<Task[]>([]);
   const [showQuestBoard, setShowQuestBoard] = useState<boolean>(false);
   const [touchStart, setTouchStart] = useState<number | null>(null);
   const [touchEnd, setTouchEnd] = useState<number | null>(null);
@@ -222,6 +222,14 @@ export function OkaneNoteWork({ addTransaction }: { addTransaction: (newTransact
     return () => {
       window.removeEventListener('keydown', handleKeyDown);
     }
+  }, []);
+
+  useEffect(() => {
+    const fetchTasks = async () => {
+      const fetchedTasks = await getTasks();
+      setTasks(fetchedTasks);
+    };
+    fetchTasks();
   }, []);
 
   return (
