@@ -25,7 +25,7 @@ export default function SettingQuest({ isEditMode }: SettingQuestProps) {
     };
 
     return (
-        <div>
+        <div className="border p-4 rounded-md my-4">
             <h2 className="text-xl font-semibold mb-4">クエストボード関係の設定</h2>
             <div className="space-y-4">
                 <div className="flex items-center space-x-2">
