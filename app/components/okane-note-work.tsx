@@ -176,8 +176,10 @@ export function OkaneNoteWork({ addTransaction }: { addTransaction: (newTransact
       setCompletedQuests(prev => {
         const isAlreadyCompleted = prev.some(q => q.id === confirmationDialog.quest?.id);
         if (isAlreadyCompleted) {
+          // クエストが既に完了している場合、そのクエストを除外
           return prev.filter(q => q.id !== confirmationDialog.quest?.id);
         } else {
+          // クエストがまだ完了していない場合、新しいクエストを追加
           addTransaction({
             amount: confirmationDialog.quest.reward,
             title: `クエスト報酬: ${confirmationDialog.quest.title}`,
@@ -331,7 +333,7 @@ export function OkaneNoteWork({ addTransaction }: { addTransaction: (newTransact
             </ul>
             <div className="flex justify-end mt-4">
               <Button variant="link" className="p-0 h-auto" onClick={() => setShowQuestBoard(true)}>
-                クエストボード <ChevronRight className="h-4 w-4"  />
+                ���エストボード <ChevronRight className="h-4 w-4"  />
               </Button>
             </div>
           </CardContent>
