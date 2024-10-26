@@ -235,6 +235,11 @@ export function OkaneNoteBalance({ transactionLogs, addTransaction }: OkaneNoteB
 
   const chartData = getLast30DaysData();
 
+  // 入金と出金の最大値を計算
+  const maxIncome = Math.max(...chartData.map(d => d.income));
+  const maxExpense = Math.max(...chartData.map(d => d.expense));
+  const maxBarValue = Math.max(maxIncome, maxExpense);
+
   const openTransactionPopup = (type: 'deposit' | 'withdrawal') => {
     setTransactionType(type === 'deposit' ? 'income' : 'expense');
     setIsDialogOpen(true);
@@ -292,11 +297,47 @@ export function OkaneNoteBalance({ transactionLogs, addTransaction }: OkaneNoteB
               <ComposedChart data={chartData}>
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis dataKey="date" hide={true} />
-                <YAxis />
+                <YAxis yAxisId="left" />
+                <YAxis yAxisId="right" orientation="right" domain={[0, maxBarValue]} />
                 <Tooltip content={<CustomTooltip />} />
-                <Bar dataKey="income" fill="#4CAF50" />
-                <Bar dataKey="expense" fill="#F44336" />
-                <Line type="monotone" dataKey="balance" stroke="#2196F3" dot={{ r: 4 }} activeDot={{ r: 8 }} />
+                <Bar dataKey="income" fill="rgba(76, 175, 80, 0.6)" yAxisId="right" />
+                <Bar dataKey="expense" fill="rgba(244, 67, 54, 0.6)" yAxisId="right" />
+                {/* 白い太い線（下層） */}
+                <Line
+                  type="monotone"
+                  dataKey="balance"
+                  stroke="#FFFFFF"
+                  strokeWidth={7}
+                  dot={false}
+                  activeDot={false}
+                  yAxisId="left"
+                  zIndex={1}
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+                {/* 青い細い線（上層） */}
+                <Line
+                  type="monotone"
+                  dataKey="balance"
+                  stroke="#2196F3"
+                  strokeWidth={3}
+                  dot={{
+                    r: 4,
+                    strokeWidth: 2,
+                    fill: "#2196F3",
+                    stroke: "#FFFFFF"
+                  }}
+                  activeDot={{
+                    r: 8,
+                    strokeWidth: 2,
+                    fill: "#2196F3",
+                    stroke: "#FFFFFF"
+                  }}
+                  yAxisId="left"
+                  zIndex={2}
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
               </ComposedChart>
             </ResponsiveContainer>
           </div>
