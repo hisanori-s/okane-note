@@ -174,9 +174,9 @@ export function OkaneNoteWork({ addTransaction }: { addTransaction: (newTransact
   const confirmQuestCompletion = () => {
     if (confirmationDialog.quest) {
       setCompletedQuests(prev => {
-        const isAlreadyCompleted = prev.some(q => q.id === confirmationDialog.quest!.id);
+        const isAlreadyCompleted = prev.some(q => q.id === confirmationDialog.quest?.id);
         if (isAlreadyCompleted) {
-          return prev.filter(q => q.id !== confirmationDialog.quest!.id);
+          return prev.filter(q => q.id !== confirmationDialog.quest?.id);
         } else {
           addTransaction({
             amount: confirmationDialog.quest.reward,
