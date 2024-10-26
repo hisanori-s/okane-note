@@ -100,7 +100,6 @@ function ConfirmationDialog({ isOpen, onClose, onConfirm, title, message }: { is
 
 // お仕事セクション
 export function OkaneNoteWork({ addTransaction }: { addTransaction: (newTransaction: Omit<TransactionLog, 'id' | 'timestamp' | 'balance' | 'isValid'>) => void }) {
-  // 'works' 状態変数を削除
   const [todaysWorks, setTodaysWorks] = useState<Work[]>([]);
   const [completedQuests, setCompletedQuests] = useState<Quest[]>([]);
   const [showQuestBoard, setShowQuestBoard] = useState<boolean>(false);
@@ -168,29 +167,39 @@ export function OkaneNoteWork({ addTransaction }: { addTransaction: (newTransact
   }, [todaysWorks, completedQuests]);
 
   const handleQuestCompletion = (quest: Quest) => {
-    setConfirmationDialog({ isOpen: true, quest });
+    const isAlreadyCompleted = completedQuests.some(q => q.id === quest.id);
+    if (isAlreadyCompleted) {
+      // クエストが既に完了している場合、直接削除
+      setCompletedQuests(prev => prev.filter(q => q.id !== quest.id));
+      // トランザクションを削除（または負の金額で相殺）
+      addTransaction({
+        amount: -quest.reward,
+        title: `クエスト報酬取消: ${quest.title}`,
+        note: '',
+        category: 'expense',
+      });
+    } else {
+      // クエストがまだ完了していない場合、確認ダイアログを表示
+      setConfirmationDialog({ isOpen: true, quest });
+    }
   };
 
   const confirmQuestCompletion = () => {
     if (confirmationDialog.quest) {
-      setCompletedQuests(prev => {
-        const isAlreadyCompleted = prev.some(q => q.id === confirmationDialog.quest?.id);
-        if (isAlreadyCompleted) {
-          // クエストが既に完了している場合、そのクエストを除外
-          return prev.filter(q => q.id !== confirmationDialog.quest?.id);
-        } else {
-          // クエストがまだ完了していない場合、新しいクエストを追加
-          addTransaction({
-            amount: confirmationDialog.quest.reward,
-            title: `クエスト報酬: ${confirmationDialog.quest.title}`,
-            note: '',
-            category: 'income',
-          });
-          return [...prev, confirmationDialog.quest];
-        }
+      // クエスト達成の処理を実装
+      setCompletedQuests(prev => [...prev, confirmationDialog.quest!]);
+
+      // トランザクションを追加
+      addTransaction({
+        amount: confirmationDialog.quest.reward,
+        title: `クエスト報酬: ${confirmationDialog.quest.title}`,
+        note: '',
+        category: 'income',
       });
+
+      // 確認ダイアログを閉じる
+      setConfirmationDialog({ isOpen: false, quest: null });
     }
-    setConfirmationDialog({ isOpen: false, quest: null });
   };
 
   useEffect(() => {
@@ -302,7 +311,7 @@ export function OkaneNoteWork({ addTransaction }: { addTransaction: (newTransact
                     {work.title}
                     <AnimatedReward
                       reward={work.reward}
-                      isCompleted={work.completed}
+                      isCompleted={work.completed ?? false}
                       isAnimating={animatingTaskId === work.id}
                       isQuest={false}
                     />
@@ -333,7 +342,7 @@ export function OkaneNoteWork({ addTransaction }: { addTransaction: (newTransact
             </ul>
             <div className="flex justify-end mt-4">
               <Button variant="link" className="p-0 h-auto" onClick={() => setShowQuestBoard(true)}>
-                ���エストボード <ChevronRight className="h-4 w-4"  />
+                クエストボード <ChevronRight className="h-4 w-4"  />
               </Button>
             </div>
           </CardContent>

@@ -58,12 +58,10 @@ export type ExecutionSpan = 'weekly' | 'monthly';
 export interface Work {
   id: number;
   title: string;
+  reward: number;
   executionSpan: ExecutionSpan;
   executionDays: number[]; // 週の場合は0-6（日-土）、月の場合は1-31
-  reward: number;
-  isValid: boolean;
-  note: string;
-  completed?: boolean; // この行を追加
+  completed: boolean; // undefined を許容しない
 }
 
 export interface WorkSettings {
