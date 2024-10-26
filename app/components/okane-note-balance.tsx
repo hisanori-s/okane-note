@@ -12,7 +12,12 @@ import { NameType, ValueType } from 'recharts/types/component/DefaultTooltipCont
 import { TransactionLog } from '@/types'
 import { formatDate, getNextSunday } from '@/lib/date-utils'
 import { calculateCompoundInterest } from '@/lib/financial-utils'
-import { dummyTransactions } from '@/lib/supabase/dummy/transactions'
+
+// OkaneNoteBalanceProps インターフェースを追加
+interface OkaneNoteBalanceProps {
+  transactionLogs: TransactionLog[];
+  addTransaction: (newTransaction: Omit<TransactionLog, 'id' | 'timestamp' | 'balance' | 'isValid'>) => void;
+}
 
 // TransactionPopupPropsの定義を追加（入出金ポップアップ）
 interface TransactionPopupProps {
@@ -189,8 +194,7 @@ const CustomTooltip = ({ active, payload, label }: TooltipProps<ValueType, NameT
 };
 
 // 残高概要セクション
-export function OkaneNoteBalance() {
-  const [transactionLogs, setTransactionLogs] = useState<TransactionLog[]>(dummyTransactions);
+export function OkaneNoteBalance({ transactionLogs, addTransaction }: OkaneNoteBalanceProps) {
   const [showHistory, setShowHistory] = useState(false);
   const [transactionPopup, setTransactionPopup] = useState<{ isOpen: boolean; type: 'deposit' | 'withdrawal' } | null>(null);
   const [isCalculating, setIsCalculating] = useState(false);
@@ -226,23 +230,10 @@ export function OkaneNoteBalance() {
     setTransactionPopup(null);
   };
 
-  const addTransaction = (newTransaction: Omit<TransactionLog, 'id' | 'timestamp' | 'balance' | 'isValid'>) => {
+  const handleAddTransaction = (newTransaction: Omit<TransactionLog, 'id' | 'timestamp' | 'balance' | 'isValid'>) => {
     setIsCalculating(true);
     setTimeout(() => {
-      const lastBalance = transactionLogs[transactionLogs.length - 1]?.balance || 0;
-      const newBalance = newTransaction.category === 'income'
-        ? lastBalance + newTransaction.amount
-        : lastBalance - newTransaction.amount;
-
-      const transaction: TransactionLog = {
-        ...newTransaction,
-        id: transactionLogs.length + 1,
-        timestamp: new Date().toISOString(),
-        balance: newBalance,
-        isValid: true,
-      };
-
-      setTransactionLogs(prevLogs => [...prevLogs, transaction]);
+      addTransaction(newTransaction);
       setIsCalculating(false);
     }, 1000);
   };
@@ -305,7 +296,7 @@ export function OkaneNoteBalance() {
         isOpen={transactionPopup?.isOpen ?? false}
         onClose={closeTransactionPopup}
         type={transactionPopup?.type ?? 'deposit'}
-        onSubmit={addTransaction}
+        onSubmit={handleAddTransaction}
       />
 
       {showHistory && (

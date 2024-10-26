@@ -1,9 +1,9 @@
 "use client";
 
+import { useState } from "react"
 import { OkaneNoteHeader } from "@/app/components/okane-note-header"
 import { OkaneNoteBalance } from "@/app/components/okane-note-balance"
 import { OkaneNoteWork } from "@/app/components/okane-note-work"
-import { useState } from "react"
 import { TransactionLog } from '@/types'
 import { dummyTransactions } from '@/lib/supabase/dummy/transactions'
 
@@ -32,7 +32,10 @@ export default function Page() {
   return (
     <div className="max-w-md mx-auto p-4 space-y-4">
       <OkaneNoteHeader />
-      <OkaneNoteBalance transactionLogs={transactionLogs} setTransactionLogs={setTransactionLogs} addTransaction={addTransaction} />
+      <OkaneNoteBalance
+        transactionLogs={transactionLogs}
+        addTransaction={addTransaction}
+      />
       <OkaneNoteWork addTransaction={addTransaction} />
     </div>
   )
