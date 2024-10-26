@@ -14,8 +14,6 @@
 │   ├── layout.tsx
 │   └── page.tsx
 ├── components
-│   ├── okane-note
-│   │   └── TransactionPopup.tsx
 │   ├── ui
 │   │   ├── button.tsx
 │   │   ├── card.tsx
