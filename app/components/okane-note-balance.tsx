@@ -1,4 +1,18 @@
+import { useState, useEffect, useRef } from "react"
+import { X } from "lucide-react"
+import { Button } from "@/components/ui/button"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Input } from "@/components/ui/input"
+import { Textarea } from "@/components/ui/textarea"
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
+import { ComposedChart, Line, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'
+import { TooltipProps } from 'recharts';
+import { NameType, ValueType } from 'recharts/types/component/DefaultTooltipContent';
 
+import { TransactionLog } from '@/types'
+import { formatDate, getNextSunday } from '@/lib/date-utils'
+import { calculateCompoundInterest } from '@/lib/financial-utils'
+import { dummyTransactions } from '@/lib/supabase/dummy/transactions'
 
 // TransactionPopupPropsの定義を追加（入出金ポップアップ）
 interface TransactionPopupProps {

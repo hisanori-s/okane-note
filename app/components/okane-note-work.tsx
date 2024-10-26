@@ -1,3 +1,13 @@
+import { useState, useEffect, useRef } from "react"
+import { ArrowLeftRight, ChevronRight, ChevronLeft } from "lucide-react"
+import { Button } from "@/components/ui/button"
+import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card"
+import { Checkbox } from "@/components/ui/checkbox"
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog"
+
+import { TransactionLog, Task, DailyWorkRecord } from '@/types'
+import { dummyTasks } from '@/lib/supabase/dummy/tasks'
+
 // アニメーション付きの報酬表示コンポーネント（お仕事セクション）
 function AnimatedReward({ reward, isCompleted, isAnimating, isQuest }: { reward: number; isCompleted: boolean; isAnimating: boolean; isQuest: boolean }) {
   return (

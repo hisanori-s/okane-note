@@ -1,7 +1,9 @@
 .
 ├── app
 │   ├── components
-│   │   └── okane-note.tsx
+│   │   ├── okane-note-balance.tsx
+│   │   ├── okane-note-header.tsx
+│   │   ├── okane-note-work.tsx
 │   ├── fonts
 │   │   ├── GeistMonoVF.woff
 │   │   └── GeistVF.woff

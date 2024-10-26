@@ -1,6 +1,8 @@
 "use client";
 
-import { OkaneNoteHeader, OkaneNoteBalance, OkaneNoteWork } from "@/app/components/okane-note"
+import { OkaneNoteHeader } from "@/app/components/okane-note-header"
+import { OkaneNoteBalance } from "@/app/components/okane-note-balance"
+import { OkaneNoteWork } from "@/app/components/okane-note-work"
 import { useState } from "react"
 import { TransactionLog } from '@/types'
 import { dummyTransactions } from '@/lib/supabase/dummy/transactions'
