@@ -22,7 +22,16 @@ import { dummyTasks } from '@/lib/supabase/dummy/tasks'
 import { formatDate, getNextSunday } from '@/lib/date-utils'
 import { calculateCompoundInterest } from '@/lib/financial-utils'
 
-// アニメーション付きの報酬表示コンポーネント
+// コンポーネント一覧
+// - AnimatedReward: アニメーション付きの報酬表示コンポーネント（お仕事セクション）
+// - QuestBoard: クエストボードコンポーネント（クエストセクション）
+// - TransactionPopup: 取引ポップアップコンポーネント（入出金ポップアップ）
+// - ConfirmationDialog: 確認ダイアログコンポーネント（クエストボードでのクエスト完了確認）
+// - TransactionHistory: 取引履歴コンポーネント（通帳セクション）
+// - CustomTooltip: カスタムツールチップコンポーネント（残高概要セクション）
+// - OkaneNote: メインのOkaneNoteコンポーネント
+
+// アニメーション付きの報酬表示コンポーネント（お仕事セクション）
 function AnimatedReward({ reward, isCompleted, isAnimating, isQuest }: { reward: number; isCompleted: boolean; isAnimating: boolean; isQuest: boolean }) {
   return (
     <span
@@ -41,7 +50,7 @@ function AnimatedReward({ reward, isCompleted, isAnimating, isQuest }: { reward:
   );
 }
 
-// QuestBoardコンポーネント
+// QuestBoardコンポーネント（クエストボード）
 function QuestBoard({ tasks, onToggleTask, onBack }: { tasks: Task[], onToggleTask: (id: number) => void, onBack: () => void }) {
   const quests = tasks.filter(task => task.category === 'クエスト' && task.isValid);
 
@@ -83,7 +92,7 @@ function QuestBoard({ tasks, onToggleTask, onBack }: { tasks: Task[], onToggleTa
   )
 }
 
-// TransactionPopupPropsの定義を追加
+// TransactionPopupPropsの定義を追加（入出金ポップアップ）
 interface TransactionPopupProps {
   isOpen: boolean;
   onClose: () => void;
@@ -91,7 +100,7 @@ interface TransactionPopupProps {
   onSubmit: (transaction: Omit<TransactionLog, 'id' | 'timestamp' | 'balance' | 'isValid'>) => void;
 }
 
-// TransactionPopupコンポーネントを統合
+// TransactionPopupコンポーネントを統合（入出金ポップアップ）
 function TransactionPopup({ isOpen, onClose, type, onSubmit }: TransactionPopupProps) {
   const [amount, setAmount] = useState('');
   const [title, setTitle] = useState('');
@@ -174,7 +183,7 @@ function TransactionPopup({ isOpen, onClose, type, onSubmit }: TransactionPopupP
   );
 }
 
-// 確認ダイアログコンポーネント
+// 確認ダイアログコンポーネント（クエストボードでのクエスト完了確認）
 function ConfirmationDialog({ isOpen, onClose, onConfirm, title, message }: { isOpen: boolean; onClose: () => void; onConfirm: () => void; title: string; message: string }) {
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -192,7 +201,7 @@ function ConfirmationDialog({ isOpen, onClose, onConfirm, title, message }: { is
   );
 }
 
-// 取引履歴コンポーネント
+// 取引履歴コンポーネント（通帳セクション）
 function TransactionHistory({ transactions, onClose }: { transactions: TransactionLog[], onClose: () => void }) {
   const [touchStart, setTouchStart] = useState<number | null>(null);
   const [touchEnd, setTouchEnd] = useState<number | null>(null);
@@ -251,7 +260,7 @@ function TransactionHistory({ transactions, onClose }: { transactions: Transacti
   );
 }
 
-// カスタムツールチップコンポーネント
+// カスタムツールチップコンポーネント（残高概要セクション）
 const CustomTooltip = ({ active, payload, label }: TooltipProps<ValueType, NameType>) => {
   if (active && payload && payload.length) {
     return (
@@ -266,7 +275,7 @@ const CustomTooltip = ({ active, payload, label }: TooltipProps<ValueType, NameT
   return null;
 };
 
-// settingsDataの型を定義
+// settingsDataの型を定義（設定セクション）
 type SettingsSection = {
   checkbox1: boolean;
   checkbox2: boolean;
@@ -275,6 +284,7 @@ type SettingsSection = {
   selectField: string;
 };
 
+// settingsDataの型を定義（仕事・クエストセクション）
 type SettingsData = {
   compoundInterest: SettingsSection;
   workList: SettingsSection;
