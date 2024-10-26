@@ -28,7 +28,7 @@ function AnimatedReward({ reward, isCompleted, isAnimating, isQuest }: { reward:
 }
 
 // QuestBoardコンポーネント（クエストボード）
-function QuestBoard({ onToggleQuest, onBack }: { onToggleQuest: (id: number) => void, onBack: () => void }) {
+function QuestBoard({ onToggleQuest, onBack, completedQuests }: { onToggleQuest: (quest: Quest) => void, onBack: () => void, completedQuests: Quest[] }) {
   const [quests, setQuests] = useState<Quest[]>([]);
 
   useEffect(() => {
@@ -59,7 +59,8 @@ function QuestBoard({ onToggleQuest, onBack }: { onToggleQuest: (id: number) => 
             <li key={quest.id} className="flex items-center space-x-2">
               <Checkbox
                 id={`quest-${quest.id}`}
-                onCheckedChange={() => onToggleQuest(quest.id)}
+                checked={completedQuests.some(q => q.id === quest.id)}
+                onCheckedChange={() => onToggleQuest(quest)}
               />
               <label
                 htmlFor={`quest-${quest.id}`}
@@ -97,23 +98,17 @@ function ConfirmationDialog({ isOpen, onClose, onConfirm, title, message }: { is
   );
 }
 
-
-
-
-
-
-
 // お仕事セクション
 export function OkaneNoteWork({ addTransaction }: { addTransaction: (newTransaction: Omit<TransactionLog, 'id' | 'timestamp' | 'balance' | 'isValid'>) => void }) {
   const [works, setWorks] = useState<Work[]>([]);
-  const [quests, setQuests] = useState<Quest[]>([]);
   const [todaysWorks, setTodaysWorks] = useState<Work[]>([]);
+  const [completedQuests, setCompletedQuests] = useState<Quest[]>([]);
   const [showQuestBoard, setShowQuestBoard] = useState<boolean>(false);
   const [touchStart, setTouchStart] = useState<number | null>(null);
   const [touchEnd, setTouchEnd] = useState<number | null>(null);
   const [animatingTaskId, setAnimatingTaskId] = useState<number | null>(null);
   const [isWorkDayCompleted, setIsWorkDayCompleted] = useState(false);
-  const [confirmationDialog, setConfirmationDialog] = useState<{ isOpen: boolean; taskId: number | null }>({ isOpen: false, taskId: null });
+  const [confirmationDialog, setConfirmationDialog] = useState<{ isOpen: boolean; quest: Quest | null }>({ isOpen: false, quest: null });
   const [isCalculating, setIsCalculating] = useState(false);
   const lastSavedDate = useRef(new Date().toDateString());
 
@@ -153,44 +148,99 @@ export function OkaneNoteWork({ addTransaction }: { addTransaction: (newTransact
     setIsCalculating(true);
     setTimeout(() => {
       const completedWorks = todaysWorks.filter(work => work.completed);
+      const allCompletedTasks = [...completedWorks, ...completedQuests];
       const dailyRecord: DailyWorkRecord = {
         id: Date.now(),
         userId: 1, // 仮のユーザーID
         date: new Date().toISOString().split('T')[0],
         scheduledTasksCount: todaysWorks.length,
-        completedTasksCount: completedWorks.length,
-        maxPossibleReward: todaysWorks.reduce((sum, work) => sum + work.reward, 0),
+        completedTasksCount: allCompletedTasks.length,
+        maxPossibleReward: allCompletedTasks.reduce((sum, task) => sum + task.reward, 0),
         scheduledTasks: todaysWorks.map(({ id, title, reward }) => ({ id, title, reward })),
-        completedTasks: completedWorks.map(({ id, title, reward }) => ({ id, title, reward })),
+        completedTasks: allCompletedTasks.map(({ id, title, reward }) => ({ id, title, reward })),
       };
+
+      // TODO: 将来的にはここでデータベースに保存する処理を実装する
       console.log('Daily work record saved:', dailyRecord);
       setIsWorkDayCompleted(true);
       setIsCalculating(false);
     }, 1000);
-  }, [todaysWorks]);
+  }, [todaysWorks, completedQuests]);
 
-  const handleQuestCompletion = (questId: number) => {
-    const quest = works.find(q => q.id === questId);
-    if (quest) {
-      setConfirmationDialog({ isOpen: true, taskId: questId });
-    }
+  const handleQuestCompletion = (quest: Quest) => {
+    setConfirmationDialog({ isOpen: true, quest });
   };
 
   const confirmQuestCompletion = () => {
-    if (confirmationDialog.taskId !== null) {
-      const quest = works.find(work => work.id === confirmationDialog.taskId);
-      if (quest) {
-        toggleTask(quest.id);
-        addTransaction({
-          amount: quest.reward,
-          title: `クエスト報酬: ${quest.title}`,
-          note: '',
-          category: 'income',
-        });
+    if (confirmationDialog.quest) {
+      setCompletedQuests(prev => {
+        const isAlreadyCompleted = prev.some(q => q.id === confirmationDialog.quest!.id);
+        if (isAlreadyCompleted) {
+          return prev.filter(q => q.id !== confirmationDialog.quest!.id);
+        } else {
+          addTransaction({
+            amount: confirmationDialog.quest.reward,
+            title: `クエスト報酬: ${confirmationDialog.quest.title}`,
+            note: '',
+            category: 'income',
+          });
+          return [...prev, confirmationDialog.quest];
+        }
+      });
+    }
+    setConfirmationDialog({ isOpen: false, quest: null });
+  };
+
+  useEffect(() => {
+    const handleDateChange = async () => {
+      const currentDate = new Date().toDateString();
+      if (currentDate !== lastSavedDate.current) {
+        const daysBetween = Math.floor((new Date(currentDate).getTime() - new Date(lastSavedDate.current).getTime()) / (1000 * 3600 * 24));
+
+        if (daysBetween <= 7) {
+          // 7日以内の場合、全ての日のログを作成
+          for (let i = 1; i <= daysBetween; i++) {
+            const date = new Date(lastSavedDate.current);
+            date.setDate(date.getDate() + i);
+            saveDailyWorkRecord();
+          }
+        } else {
+          // 8上の場合、直近7日分のみログを作成
+          for (let i = 6; i >= 0; i--) {
+            const date = new Date(currentDate);
+            date.setDate(date.getDate() - i);
+            saveDailyWorkRecord();
+          }
+        }
+
+        lastSavedDate.current = currentDate;
+        setIsWorkDayCompleted(false);
+        setCompletedQuests([]); // 日付が変わったらクエストの達成状況をリセット
+
+        // 仕事のリセットと今日の仕事のフィルタリング
+        const fetchedWorks = await getWorks();
+        setWorks(fetchedWorks);
+        filterTodaysWorks(fetchedWorks);
+      }
+    };
+
+    handleDateChange();
+    const intervalId = setInterval(handleDateChange, 60000); // 1分ごとにチェック
+
+    return () => clearInterval(intervalId);
+  }, []);
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') {
+        setShowQuestBoard(prev => !prev);
       }
     }
-    setConfirmationDialog({ isOpen: false, taskId: null });
-  };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+    }
+  }, []);
 
   useEffect(() => {
     const fetchWorks = async () => {
@@ -198,14 +248,7 @@ export function OkaneNoteWork({ addTransaction }: { addTransaction: (newTransact
       setWorks(fetchedWorks);
       filterTodaysWorks(fetchedWorks);
     };
-
-    const fetchQuests = async () => {
-      const fetchedQuests = await getQuests();
-      setQuests(fetchedQuests.filter(quest => quest.isValid));
-    };
-
     fetchWorks();
-    fetchQuests();
   }, []);
 
   const filterTodaysWorks = (allWorks: Work[]) => {
@@ -235,6 +278,7 @@ export function OkaneNoteWork({ addTransaction }: { addTransaction: (newTransact
         <QuestBoard
           onToggleQuest={handleQuestCompletion}
           onBack={() => setShowQuestBoard(false)}
+          completedQuests={completedQuests}
         />
       ) : (
         <Card>
@@ -265,6 +309,27 @@ export function OkaneNoteWork({ addTransaction }: { addTransaction: (newTransact
                   </label>
                 </li>
               ))}
+              {completedQuests.map(quest => (
+                <li key={quest.id} className="flex items-center space-x-2">
+                  <Checkbox
+                    id={`quest-${quest.id}`}
+                    checked={true}
+                    disabled={true}
+                  />
+                  <label
+                    htmlFor={`quest-${quest.id}`}
+                    className="flex-grow font-bold text-foreground"
+                  >
+                    {quest.title}
+                    <AnimatedReward
+                      reward={quest.reward}
+                      isCompleted={true}
+                      isAnimating={false}
+                      isQuest={true}
+                    />
+                  </label>
+                </li>
+              ))}
             </ul>
             <div className="flex justify-end mt-4">
               <Button variant="link" className="p-0 h-auto" onClick={() => setShowQuestBoard(true)}>
@@ -291,7 +356,7 @@ export function OkaneNoteWork({ addTransaction }: { addTransaction: (newTransact
 
       <ConfirmationDialog
         isOpen={confirmationDialog.isOpen}
-        onClose={() => setConfirmationDialog({ isOpen: false, taskId: null })}
+        onClose={() => setConfirmationDialog({ isOpen: false, quest: null })}
         onConfirm={confirmQuestCompletion}
         title="クエスト完了"
         message="このクエストを完了しますか？"
