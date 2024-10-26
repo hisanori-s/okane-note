@@ -1,6 +1,5 @@
 'use client'
 import { useState, useEffect, useRef } from "react"
-import { X } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
@@ -120,66 +119,6 @@ function TransactionPopup({ isOpen, onClose, type, onSubmit }: TransactionPopupP
 
 
 
-// 取引履歴コンポーネント（通帳セクション）
-function TransactionHistory({ transactions, onClose }: { transactions: TransactionLog[], onClose: () => void }) {
-  const [touchStart, setTouchStart] = useState<number | null>(null);
-  const [touchEnd, setTouchEnd] = useState<number | null>(null);
-
-  const handleTouchStart = (e: React.TouchEvent) => {
-    setTouchStart(e.targetTouches[0].clientX);
-  }
-
-  const handleTouchMove = (e: React.TouchEvent) => {
-    setTouchEnd(e.targetTouches[0].clientX);
-  }
-
-  const handleTouchEnd = () => {
-    if (!touchStart || !touchEnd) return;
-    const distance = touchStart - touchEnd;
-    const isRightSwipe = distance < -50;
-    if (isRightSwipe) {
-      onClose();
-    }
-  }
-
-  return (
-    <div
-      className="fixed inset-0 bg-background z-50 p-4 overflow-auto"
-      onTouchStart={handleTouchStart}
-      onTouchMove={handleTouchMove}
-      onTouchEnd={handleTouchEnd}
-    >
-      <Button onClick={onClose} className="absolute top-4 right-4" variant="ghost" size="icon">
-        <X className="h-4 w-4" />
-      </Button>
-      <h2 className="text-2xl font-bold mb-4">おかね通帳</h2>
-      <table className="w-full">
-        <thead>
-          <tr>
-            <th className="text-left">日付</th>
-            <th className="text-left">タイトル</th>
-            <th className="text-right">金額</th>
-            <th className="text-right">残高</th>
-          </tr>
-        </thead>
-        <tbody>
-          {transactions.map((transaction) => (
-            <tr key={transaction.id}>
-              <td>{new Date(transaction.timestamp).toLocaleDateString()}</td>
-              <td>{transaction.title}</td>
-              <td className={`text-right ${transaction.category === 'income' ? 'text-green-600' : 'text-red-600'}`}>
-                {transaction.category === 'income' ? '+' : '-'}{transaction.amount.toLocaleString()}円
-              </td>
-              <td className="text-right">{transaction.balance.toLocaleString()}円</td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
-  );
-}
-
-
 // カスタムツールチップコンポーネント（残高概要セクション）
 const CustomTooltip = ({ active, payload, label }: TooltipProps<ValueType, NameType>) => {
   if (active && payload && payload.length) {
@@ -205,9 +144,6 @@ const CustomTooltip = ({ active, payload, label }: TooltipProps<ValueType, NameT
 export function OkaneNoteBalance({ transactionLogs, addTransaction }: OkaneNoteBalanceProps) {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [transactionType, setTransactionType] = useState<'income' | 'expense'>('income');
-  const [amount, setAmount] = useState('');
-  const [title, setTitle] = useState('');
-  const [note, setNote] = useState('');
   const [isCalculating, setIsCalculating] = useState(false);
 
   const today = new Date();
@@ -310,7 +246,6 @@ export function OkaneNoteBalance({ transactionLogs, addTransaction }: OkaneNoteB
                   dot={{ r: 4, strokeWidth: 2, fill: "#2196F3", stroke: "#fff" }}
                   activeDot={{ r: 8, strokeWidth: 2, fill: "#2196F3", stroke: "#fff" }}
                   yAxisId="left"
-                  zIndex={1}
                   strokeLinecap="round"
                   strokeLinejoin="round"
                   style={{

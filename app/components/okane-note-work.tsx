@@ -100,7 +100,7 @@ function ConfirmationDialog({ isOpen, onClose, onConfirm, title, message }: { is
 
 // お仕事セクション
 export function OkaneNoteWork({ addTransaction }: { addTransaction: (newTransaction: Omit<TransactionLog, 'id' | 'timestamp' | 'balance' | 'isValid'>) => void }) {
-  const [works, setWorks] = useState<Work[]>([]);
+  // 'works' 状態変数を削除
   const [todaysWorks, setTodaysWorks] = useState<Work[]>([]);
   const [completedQuests, setCompletedQuests] = useState<Quest[]>([]);
   const [showQuestBoard, setShowQuestBoard] = useState<boolean>(false);
@@ -219,7 +219,6 @@ export function OkaneNoteWork({ addTransaction }: { addTransaction: (newTransact
 
         // 仕事のリセットと今日の仕事のフィルタリング
         const fetchedWorks = await getWorks();
-        setWorks(fetchedWorks);
         filterTodaysWorks(fetchedWorks);
       }
     };
@@ -245,7 +244,6 @@ export function OkaneNoteWork({ addTransaction }: { addTransaction: (newTransact
   useEffect(() => {
     const fetchWorks = async () => {
       const fetchedWorks = await getWorks();
-      setWorks(fetchedWorks);
       filterTodaysWorks(fetchedWorks);
     };
     fetchWorks();
@@ -354,12 +352,18 @@ export function OkaneNoteWork({ addTransaction }: { addTransaction: (newTransact
         左右スワイプで臨時仕事とお仕事リストを切り替え
       </div>
 
+      {confirmationDialog.quest && (
+        <p className="text-sm mb-4">
+          「{confirmationDialog.quest.title}」を完了しますか？
+        </p>
+      )}
+
       <ConfirmationDialog
         isOpen={confirmationDialog.isOpen}
         onClose={() => setConfirmationDialog({ isOpen: false, quest: null })}
         onConfirm={confirmQuestCompletion}
         title="クエスト完了"
-        message="このクエストを完了しますか？"
+        message={confirmationDialog.quest ? `「${confirmationDialog.quest.title}」を完了しますか？` : ""}
       />
 
       {isCalculating && (
