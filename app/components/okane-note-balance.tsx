@@ -302,41 +302,20 @@ export function OkaneNoteBalance({ transactionLogs, addTransaction }: OkaneNoteB
                 <Tooltip content={<CustomTooltip />} />
                 <Bar dataKey="income" fill="rgba(76, 175, 80, 0.6)" yAxisId="right" />
                 <Bar dataKey="expense" fill="rgba(244, 67, 54, 0.6)" yAxisId="right" />
-                {/* 白い太い線（下層） */}
-                <Line
-                  type="monotone"
-                  dataKey="balance"
-                  stroke="#FFFFFF"
-                  strokeWidth={7}
-                  dot={false}
-                  activeDot={false}
-                  yAxisId="left"
-                  zIndex={1}
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-                {/* 青い細い線（上層） */}
                 <Line
                   type="monotone"
                   dataKey="balance"
                   stroke="#2196F3"
                   strokeWidth={3}
-                  dot={{
-                    r: 4,
-                    strokeWidth: 2,
-                    fill: "#2196F3",
-                    stroke: "#FFFFFF"
-                  }}
-                  activeDot={{
-                    r: 8,
-                    strokeWidth: 2,
-                    fill: "#2196F3",
-                    stroke: "#FFFFFF"
-                  }}
+                  dot={{ r: 4, strokeWidth: 2, fill: "#2196F3", stroke: "#fff" }}
+                  activeDot={{ r: 8, strokeWidth: 2, fill: "#2196F3", stroke: "#fff" }}
                   yAxisId="left"
-                  zIndex={2}
+                  zIndex={1}
                   strokeLinecap="round"
                   strokeLinejoin="round"
+                  style={{
+                    filter: "drop-shadow(0px 0px 2px rgba(255, 255, 255, 0.8))",
+                  }}
                 />
               </ComposedChart>
             </ResponsiveContainer>
