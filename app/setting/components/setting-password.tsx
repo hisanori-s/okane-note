@@ -49,7 +49,7 @@ export default function SettingPassword({ onEditModeChange }: SettingPasswordPro
 
     return (
         <div className="flex items-center justify-between mb-4">
-            <span>編集モード</span>
+            <span>編集モード（pass:1234）</span>
             <Switch
                 checked={isEditMode}
                 onCheckedChange={handleToggleChange}
