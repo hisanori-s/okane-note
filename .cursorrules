@@ -39,6 +39,26 @@
 │   ├── date-utils.ts
 │   ├── financial-utils.ts
 │   └── utils.ts
+├── components
+│   ├── okane-note.tsx
+│   └── ui
+│       ├── 必要コンポーネント
+├── types
+│   ├── index.ts
+├── lib
+│   ├── db
+│   │   ├── settings.ts
+│   │   └── transactions.ts
+│   ├── supabase
+│   │   ├── dummy
+│   │   │   ├── settings.ts
+│   │   │   ├── tasks.ts
+│   │   │   └── transactions.ts
+│   │   └── client.ts
+│   ├── date-utils.ts
+│   ├── financial-utils.ts
+│   └── utils.ts
+
 ```
 appディレクトリの位置を記憶してください。
 ユーザーがappディレクトリを指定する際は、すべてこの既存のappディレクトリのことを指します。
