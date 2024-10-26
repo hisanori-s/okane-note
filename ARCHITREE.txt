@@ -11,7 +11,8 @@
 │   │   ├── components
 │   │   │   ├── setting-compound-interest.tsx
 │   │   │   ├── setting-work.tsx
-│   │   │   └── setting-quest.tsx
+│   │   │   ├── setting-quest.tsx
+│   │   │   └── setting-password.tsx
 │   │   └── page.tsx
 │   ├── favicon.ico
 │   ├── globals.css
