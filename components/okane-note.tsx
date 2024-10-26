@@ -83,8 +83,16 @@ function QuestBoard({ tasks, onToggleTask, onBack }: { tasks: Task[], onToggleTa
   )
 }
 
-// トランザクションポップアップコンポーネント
-function TransactionPopup({ isOpen, onClose, type, onSubmit }: { isOpen: boolean; onClose: () => void; type: 'deposit' | 'withdrawal'; onSubmit: (transaction: Omit<TransactionLog, 'id' | 'timestamp' | 'balance' | 'isValid'>) => void }) {
+// TransactionPopupPropsの定義を追加
+interface TransactionPopupProps {
+  isOpen: boolean;
+  onClose: () => void;
+  type: 'deposit' | 'withdrawal';
+  onSubmit: (transaction: Omit<TransactionLog, 'id' | 'timestamp' | 'balance' | 'isValid'>) => void;
+}
+
+// TransactionPopupコンポーネントを統合
+function TransactionPopup({ isOpen, onClose, type, onSubmit }: TransactionPopupProps) {
   const [amount, setAmount] = useState('');
   const [title, setTitle] = useState('');
   const [note, setNote] = useState('');
@@ -258,6 +266,21 @@ const CustomTooltip = ({ active, payload, label }: TooltipProps<ValueType, NameT
   return null;
 };
 
+// settingsDataの型を定義
+type SettingsSection = {
+  checkbox1: boolean;
+  checkbox2: boolean;
+  radio: string;
+  textField: string;
+  selectField: string;
+};
+
+type SettingsData = {
+  compoundInterest: SettingsSection;
+  workList: SettingsSection;
+  questBoard: SettingsSection;
+};
+
 // メインのOkaneNoteコンポーネント
 export function OkaneNote() {
   const [tasks, setTasks] = useState<Task[]>(dummyTasks);
@@ -274,7 +297,7 @@ export function OkaneNote() {
   const [showHelpPopup, setShowHelpPopup] = useState(false);
   const [showSettingsPopup, setShowSettingsPopup] = useState(false);
   const [isEditMode, setIsEditMode] = useState(false); // Initial value is now false
-  const [settingsData, setSettingsData] = useState({
+  const [settingsData, setSettingsData] = useState<SettingsData>({
     compoundInterest: {
       checkbox1: false,
       checkbox2: false,
@@ -311,19 +334,13 @@ export function OkaneNote() {
 
     const filteredLogs = transactionLogs.filter(log => new Date(log.timestamp) >= thirtyDaysAgo);
 
-    let lastBalance = filteredLogs[0]?.balance || 0;
-    const chartData = filteredLogs.map(log => {
-      const data = {
-        date: log.timestamp,
-        balance: log.balance,
-        income: log.category === 'income' ? log.amount : 0,
-        expense: log.category === 'expense' ? log.amount : 0
-      };
-      lastBalance = log.balance;
-      return data;
-    });
-
-    return chartData;
+    // lastBalanceを削除し、直接filteredLogsを使用
+    return filteredLogs.map(log => ({
+      date: log.timestamp,
+      balance: log.balance,
+      income: log.category === 'income' ? log.amount : 0,
+      expense: log.category === 'expense' ? log.amount : 0
+    }));
   };
 
   const chartData = getLast30DaysData();
@@ -442,7 +459,7 @@ export function OkaneNote() {
     }
   };
 
-  const handleSettingsChange = (section: string, field: string, value: string | boolean) => {
+  const handleSettingsChange = (section: keyof SettingsData, field: keyof SettingsSection, value: string | boolean) => {
     setSettingsData(prev => ({
       ...prev,
       [section]: {
@@ -709,8 +726,8 @@ export function OkaneNote() {
                   <div className="flex items-center space-x-2">
                     <Checkbox
                       id={`${section}-checkbox1`}
-                      checked={settingsData[section].checkbox1}
-                      onCheckedChange={(checked) => handleSettingsChange(section, 'checkbox1', checked)}
+                      checked={settingsData[section as keyof SettingsData].checkbox1}
+                      onCheckedChange={(checked) => handleSettingsChange(section as keyof SettingsData, 'checkbox1', checked)}
                       disabled={!isEditMode}
                     />
                     <Label htmlFor={`${section}-checkbox1`}>チェックボックス1</Label>
@@ -718,15 +735,15 @@ export function OkaneNote() {
                   <div className="flex items-center space-x-2">
                     <Checkbox
                       id={`${section}-checkbox2`}
-                      checked={settingsData[section].checkbox2}
-                      onCheckedChange={(checked) => handleSettingsChange(section, 'checkbox2', checked)}
+                      checked={settingsData[section as keyof SettingsData].checkbox2}
+                      onCheckedChange={(checked) => handleSettingsChange(section as keyof SettingsData, 'checkbox2', checked)}
                       disabled={!isEditMode}
                     />
                     <Label htmlFor={`${section}-checkbox2`}>チェックボックス2</Label>
                   </div>
                   <RadioGroup
-                    value={settingsData[section].radio}
-                    onValueChange={(value) => handleSettingsChange(section, 'radio', value)}
+                    value={settingsData[section as keyof SettingsData].radio}
+                    onValueChange={(value) => handleSettingsChange(section as keyof SettingsData, 'radio', value)}
                     disabled={!isEditMode}
                   >
                     <div className="flex items-center space-x-2">
@@ -740,13 +757,13 @@ export function OkaneNote() {
                   </RadioGroup>
                   <Input
                     placeholder="テキストフィールド"
-                    value={settingsData[section].textField}
-                    onChange={(e) => handleSettingsChange(section, 'textField', e.target.value)}
+                    value={settingsData[section as keyof SettingsData].textField}
+                    onChange={(e) => handleSettingsChange(section as keyof SettingsData, 'textField', e.target.value)}
                     disabled={!isEditMode}
                   />
                   <Select
-                    value={settingsData[section].selectField}
-                    onValueChange={(value) => handleSettingsChange(section, 'selectField', value)}
+                    value={settingsData[section as keyof SettingsData].selectField}
+                    onValueChange={(value) => handleSettingsChange(section as keyof SettingsData, 'selectField', value)}
                     disabled={!isEditMode}
                   >
                     <SelectTrigger>
