@@ -193,6 +193,7 @@ export function OkaneNoteBalance() {
   const [transactionLogs, setTransactionLogs] = useState<TransactionLog[]>(dummyTransactions);
   const [showHistory, setShowHistory] = useState(false);
   const [transactionPopup, setTransactionPopup] = useState<{ isOpen: boolean; type: 'deposit' | 'withdrawal' } | null>(null);
+  const [isCalculating, setIsCalculating] = useState(false);
 
   const today = new Date();
   const formattedDate = formatDate(today);
@@ -249,8 +250,20 @@ export function OkaneNoteBalance() {
   return (
     <>
       <div className="flex justify-between space-x-4 mb-4">
-        <Button onClick={() => openTransactionPopup('deposit')} className="flex-1 text-lg py-6">入金</Button>
-        <Button onClick={() => openTransactionPopup('withdrawal')} className="flex-1 text-lg py-6">出金</Button>
+        <Button
+          onClick={() => openTransactionPopup('deposit')}
+          className="flex-1 text-lg py-6"
+          disabled={isCalculating}
+        >
+          入金
+        </Button>
+        <Button
+          onClick={() => openTransactionPopup('withdrawal')}
+          className="flex-1 text-lg py-6"
+          disabled={isCalculating}
+        >
+          出金
+        </Button>
       </div>
 
       <Card>
@@ -264,6 +277,11 @@ export function OkaneNoteBalance() {
           </p>
         </CardHeader>
         <CardContent>
+          {isCalculating && (
+            <div className="text-center text-sm text-muted-foreground mb-2">
+              計算中...
+            </div>
+          )}
           <div className="h-64 w-full">
             <ResponsiveContainer width="100%" height="100%">
               <ComposedChart data={chartData}>
