@@ -205,7 +205,7 @@ export function OkaneNoteWork({ addTransaction }: { addTransaction: (newTransact
             saveDailyWorkRecord();
           }
         } else {
-          // 8上の場合、直近7日分のみログを作成
+          // 8日以上の場合、直近7日分のみログを作成
           for (let i = 6; i >= 0; i--) {
             const date = new Date(currentDate);
             date.setDate(date.getDate() - i);
@@ -227,7 +227,7 @@ export function OkaneNoteWork({ addTransaction }: { addTransaction: (newTransact
     const intervalId = setInterval(handleDateChange, 60000); // 1分ごとにチェック
 
     return () => clearInterval(intervalId);
-  }, []);
+  }, [saveDailyWorkRecord]); // saveDailyWorkRecordを依存配列に追加
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
