@@ -3,9 +3,10 @@
 import { useState, useEffect } from 'react';
 import { getQuests } from "@/lib/supabase/client";
 import type { Quest } from '@/types';
+import { Switch } from "@/components/ui/switch"; // Switchコンポーネントをインポート
 
 interface SettingQuestProps {
-    isEditMode: boolean;
+    isEditMode: boolean; // 編集モードを受け取る
 }
 
 export default function SettingQuest({ isEditMode }: SettingQuestProps) {
@@ -18,6 +19,14 @@ export default function SettingQuest({ isEditMode }: SettingQuestProps) {
         };
         fetchQuests();
     }, []);
+
+    const toggleQuestValidity = (id: number) => {
+        setQuests(prevQuests =>
+            prevQuests.map(quest =>
+                quest.id === id ? { ...quest, isValid: !quest.isValid } : quest
+            )
+        );
+    };
 
     const getExecutionDaysText = (quest: Quest) => {
         if (quest.frequency === 'weekly') {
@@ -38,6 +47,7 @@ export default function SettingQuest({ isEditMode }: SettingQuestProps) {
                         <th className="text-left">頻度</th>
                         <th className="text-left">実行日</th>
                         <th className="text-left">報酬</th>
+                        {isEditMode && <th className="text-left">有効/無効</th>} {/* 編集モードの時のみ表示 */}
                     </tr>
                 </thead>
                 <tbody>
@@ -47,6 +57,14 @@ export default function SettingQuest({ isEditMode }: SettingQuestProps) {
                             <td>{quest.frequency === 'weekly' ? '毎週' : '毎月'}</td>
                             <td>{getExecutionDaysText(quest)}</td>
                             <td>{quest.reward}円</td>
+                            {isEditMode && (
+                                <td>
+                                    <Switch
+                                        checked={quest.isValid}
+                                        onCheckedChange={() => toggleQuestValidity(quest.id)}
+                                    />
+                                </td>
+                            )}
                         </tr>
                     ))}
                 </tbody>

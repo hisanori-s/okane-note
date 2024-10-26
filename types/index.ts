@@ -63,6 +63,7 @@ export interface Work {
   reward: number;
   isValid: boolean;
   note: string;
+  completed?: boolean; // この行を追加
 }
 
 export interface WorkSettings {

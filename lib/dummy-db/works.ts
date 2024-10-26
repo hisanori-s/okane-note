@@ -8,7 +8,8 @@ export const dummyWorks: Work[] = [
     executionDays: [6], // 土曜日
     reward: 30,
     isValid: true,
-    note: "週末の大掃除タスク"
+    note: "週末の大掃除タスク",
+    completed: false
   },
   {
     id: 2,
@@ -17,7 +18,8 @@ export const dummyWorks: Work[] = [
     executionDays: [1], // 毎月1日
     reward: 50,
     isValid: true,
-    note: "月初めの大掃除"
+    note: "月初めの大掃除",
+    completed: false
   },
   {
     id: 3,
@@ -26,7 +28,8 @@ export const dummyWorks: Work[] = [
     executionDays: [0, 1, 2, 3, 4, 5, 6], // 日曜から土曜まで毎日
     reward: 10,
     isValid: true,
-    note: "毎日の習慣づけ"
+    note: "毎日の習慣づけ",
+    completed: false
   },
   {
     id: 4,
@@ -35,7 +38,8 @@ export const dummyWorks: Work[] = [
     executionDays: [6, 0], // 土曜と日曜
     reward: 20,
     isValid: true,
-    note: "週末のお風呂掃除"
+    note: "週末のお風呂掃除",
+    completed: false
   }
 ]
 

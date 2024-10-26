@@ -5,9 +5,8 @@ import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/componen
 import { Checkbox } from "@/components/ui/checkbox"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog"
 
-import { TransactionLog, Work, DailyWorkRecord } from '@/types'
+import { TransactionLog, Work, DailyWorkRecord, Quest } from '@/types'
 import { getWorks, getQuests } from '@/lib/supabase/client'
-import type { Quest } from '@/types'
 
 // アニメーション付きの報酬表示コンポーネント（お仕事セクション）
 function AnimatedReward({ reward, isCompleted, isAnimating, isQuest }: { reward: number; isCompleted: boolean; isAnimating: boolean; isQuest: boolean }) {
@@ -107,6 +106,7 @@ function ConfirmationDialog({ isOpen, onClose, onConfirm, title, message }: { is
 // お仕事セクション
 export function OkaneNoteWork({ addTransaction }: { addTransaction: (newTransaction: Omit<TransactionLog, 'id' | 'timestamp' | 'balance' | 'isValid'>) => void }) {
   const [works, setWorks] = useState<Work[]>([]);
+  const [quests, setQuests] = useState<Quest[]>([]);
   const [todaysWorks, setTodaysWorks] = useState<Work[]>([]);
   const [showQuestBoard, setShowQuestBoard] = useState<boolean>(false);
   const [touchStart, setTouchStart] = useState<number | null>(null);
@@ -193,62 +193,19 @@ export function OkaneNoteWork({ addTransaction }: { addTransaction: (newTransact
   };
 
   useEffect(() => {
-    const handleDateChange = async () => {
-      const currentDate = new Date().toDateString();
-      if (currentDate !== lastSavedDate.current) {
-        const daysBetween = Math.floor((new Date(currentDate).getTime() - new Date(lastSavedDate.current).getTime()) / (1000 * 3600 * 24));
-
-        if (daysBetween <= 7) {
-          // 7日以内の場合、全ての日のログを作成
-          for (let i = 1; i <= daysBetween; i++) {
-            const date = new Date(lastSavedDate.current);
-            date.setDate(date.getDate() + i);
-            saveDailyWorkRecord();
-          }
-        } else {
-          // 8日以上の場合、直近7日分のみログを作成
-          for (let i = 6; i >= 0; i--) {
-            const date = new Date(currentDate);
-            date.setDate(date.getDate() - i);
-            saveDailyWorkRecord();
-          }
-        }
-
-        lastSavedDate.current = currentDate;
-        setIsWorkDayCompleted(false);
-
-        // 仕事のリセットと今日の仕事のフィルタリング
-        const fetchedWorks = await getWorks();
-        setWorks(fetchedWorks);
-        filterTodaysWorks(fetchedWorks);
-      }
-    };
-
-    handleDateChange();
-    const intervalId = setInterval(handleDateChange, 60000); // 1分ごとにチェック
-
-    return () => clearInterval(intervalId);
-  }, []);
-
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') {
-        setShowQuestBoard(prev => !prev);
-      }
-    }
-    window.addEventListener('keydown', handleKeyDown);
-    return () => {
-      window.removeEventListener('keydown', handleKeyDown);
-    }
-  }, []);
-
-  useEffect(() => {
     const fetchWorks = async () => {
       const fetchedWorks = await getWorks();
       setWorks(fetchedWorks);
       filterTodaysWorks(fetchedWorks);
     };
+
+    const fetchQuests = async () => {
+      const fetchedQuests = await getQuests();
+      setQuests(fetchedQuests.filter(quest => quest.isValid));
+    };
+
     fetchWorks();
+    fetchQuests();
   }, []);
 
   const filterTodaysWorks = (allWorks: Work[]) => {
