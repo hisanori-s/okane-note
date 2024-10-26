@@ -59,9 +59,11 @@ export interface Work {
   id: number;
   title: string;
   reward: number;
+  isValid: boolean;
   executionSpan: ExecutionSpan;
   executionDays: number[]; // 週の場合は0-6（日-土）、月の場合は1-31
-  completed: boolean; // undefined を許容しない
+  completed: boolean;
+  note?: string; // オプショナルな note プロパティを追加
 }
 
 export interface WorkSettings {
@@ -73,7 +75,7 @@ export type QuestFrequency = 'weekly' | 'monthly';
 
 export interface Quest {
   id: number;
-  title: string;
+  title: string; // Quest には 'title' プロパティがあります
   frequency: QuestFrequency;
   executionDays: number[]; // 週の場合は0-6（日-土）、月の場合は1-31
   description: string;

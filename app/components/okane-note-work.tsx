@@ -277,6 +277,7 @@ export function OkaneNoteWork({ addTransaction }: { addTransaction: (newTransact
     setTodaysWorks(filteredWorks);
   };
 
+
   return (
     <div
       onTouchStart={handleTouchStart}
