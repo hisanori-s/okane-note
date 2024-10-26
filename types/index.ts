@@ -46,7 +46,7 @@ export type SettingsSection = {
   selectField: string;
 };
 
-export type SettingsData = {
+export type Settings = {
   compoundInterest: SettingsSection;
   workList: SettingsSection;
   questBoard: SettingsSection;
