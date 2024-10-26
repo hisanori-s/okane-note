@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react"
+import { useState, useEffect, useRef, useCallback } from "react"
 import { ArrowLeftRight, ChevronRight, ChevronLeft } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card"
@@ -137,7 +137,7 @@ export function OkaneNoteWork({ addTransaction }: { addTransaction: (newTransact
     }
   }
 
-  const saveDailyWorkRecord = () => {
+  const saveDailyWorkRecord = useCallback(() => {
     setIsCalculating(true);
     setTimeout(() => {
       const completedTasks = tasks.filter(task => task.completed && task.category === 'お仕事');
@@ -155,7 +155,7 @@ export function OkaneNoteWork({ addTransaction }: { addTransaction: (newTransact
       setIsWorkDayCompleted(true);
       setIsCalculating(false);
     }, 1000);
-  };
+  }, [tasks]); // tasks を依存配列に追加
 
   const handleQuestCompletion = (taskId: number) => {
     setConfirmationDialog({ isOpen: true, taskId });
@@ -210,7 +210,7 @@ export function OkaneNoteWork({ addTransaction }: { addTransaction: (newTransact
     const intervalId = setInterval(handleDateChange, 60000); // 1分ごとにチェック
 
     return () => clearInterval(intervalId);
-  }, []);
+  }, [saveDailyWorkRecord]); // saveDailyWorkRecord を依存配列に追加
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
